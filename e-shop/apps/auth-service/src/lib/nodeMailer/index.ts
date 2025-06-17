@@ -6,23 +6,18 @@ import path from "path";
 dotenv.config();
 
 const transport: Transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) ?? 587,
-  serice: process.env.SMTP_SERVICE,
+  service: process.env.SMTP_SERVICE, // e.g., "gmail"
   auth: {
     user: process.env.SMTP_USER,
-    password: process.env.SMTP_PASS,
+    pass: process.env.SMTP_PASS,
   },
 });
 
-//render ejs for mailing
-
+// Render ejs for mailing
 export const sendEmailTemplate = (
   templateName: string,
   data: Record<string, any>
 ): Promise<string> => {
-  //path for email
-
   const templatePath = path.join(
     process.cwd(),
     "auth-service",
@@ -39,10 +34,10 @@ export const sendEmail = async (
   to: string,
   subject: string,
   templateName: string,
-  data: any
+  data: Record<string, any>
 ) => {
   try {
-    const html = sendEmailTemplate(templateName, data);
+    const html = await sendEmailTemplate(templateName, data);
 
     await transport.sendMail({
       from: `<${process.env.SMTP_USER}>`,
@@ -51,6 +46,6 @@ export const sendEmail = async (
       html,
     });
   } catch (error) {
-    console.log(error as any);
+    console.error("Failed to send email:", error);
   }
 };

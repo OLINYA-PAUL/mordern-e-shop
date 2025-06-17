@@ -1,5 +1,6 @@
-import { NextFunction, Response, Request, response } from "express";
-import { validationError } from "../../../../../packages/error-handler/errorMiddleware";
+import { NextFunction, Response, Request } from "express";
+import { ValidationError } from "../../../../../packages/error-handler/appError";
+
 import {
   validateRegistrationData,
   checkOtpRestricTion,
@@ -24,14 +25,14 @@ export const registerUser = async (
     validateRegistrationData(req.body, "user");
 
     if (!email || !name) {
-      throw validationError("Email and password are required");
+      throw new ValidationError("Email and password are required");
     }
 
     const userExist = await prisma.users.findUnique({
       where: { email: email },
     });
     if (userExist) {
-      throw validationError("This email is already registered");
+      throw new ValidationError("This email is already registered");
     }
 
     // const result  = await prisma.users.create({})
@@ -45,6 +46,6 @@ export const registerUser = async (
       message: "Otp sent to your email please verify your account",
     });
   } catch (error) {
-    throw validationError(error as Error, req, res);
+    throw new ValidationError(error as any);
   }
 };
