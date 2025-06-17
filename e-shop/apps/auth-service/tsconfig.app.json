@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "out-tsc/auth-service",
     "types": [
-      "node"
+      "node", "express"
     ],
     "rootDir": "../../",
     "tsBuildInfoFile": "out-tsc/auth-service.app.tsbuildinfo"
