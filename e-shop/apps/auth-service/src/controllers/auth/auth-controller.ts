@@ -1,5 +1,6 @@
 import { NextFunction, Response, Request } from "express";
-import { ValidationError } from "../../../../../packages/error-handler/appError";
+import { ValidationError } from "@packages/error-handler/appError";
+// import { ValidationError } from "../../../../../packages/error-handler/appError";
 
 import {
   validateRegistrationData,
