@@ -8,6 +8,7 @@ const doc = {
   },
   host: "localhost:6001",
   schemes: ["http"],
+  swagger: "2.0", // ✅ valid version
 };
 
 const outputFile = "./swagger-output.json";
