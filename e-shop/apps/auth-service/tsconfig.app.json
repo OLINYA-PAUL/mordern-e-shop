@@ -10,8 +10,9 @@
   },
   "include": [
     "src/**/*.ts",
-    "../../packages/**/*.ts"
-  ],
+    "../../packages/**/*.ts",
+     "swagger-output.json"
+, "src/swagger.ts"  ],
   "exclude": [
     "out-tsc",
     "dist",
