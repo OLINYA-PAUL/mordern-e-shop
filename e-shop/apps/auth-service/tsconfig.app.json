@@ -11,13 +11,14 @@
   "include": [
     "src/**/*.ts",
     "../../packages/**/*.ts",
-     "swagger-output.json"
-, "src/swagger.ts"  ],
+    "swagger-output.json",
+    "src/swagger.ts"
+],
   "exclude": [
     "out-tsc",
     "dist",
     "jest.config.ts",
     "src/**/*.spec.ts",
     "src/**/*.test.ts"
-  ]
+  ] 
 }
