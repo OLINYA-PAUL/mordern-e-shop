@@ -42,6 +42,26 @@
 //   console.error("Server Error", error);
 // });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -54,15 +74,16 @@ import path from "path";
 const app = express();
 
 // Optional Swagger file loading
-const swaggerPath = path.join(__dirname, "swagger-output.json");
+const swaggerPath = path.join(__dirname, "./", "swagger-output.json");
 let swaggerDocument: any = null;
 
 if (fs.existsSync(swaggerPath)) {
   swaggerDocument = require(swaggerPath);
   console.log("✅ Swagger loaded successfully.");
-} else {
-  console.warn("⚠️ Swagger file not found. Skipping Swagger UI.");
 }
+// } else {
+//   console.warn("⚠️ Swagger file not found. Skipping Swagger UI.");
+// }
 
 app.use(
   cors({
@@ -102,3 +123,4 @@ const server = app.listen(port, () => {
 server.on("error", (error) => {
   console.error("❌ Server Error", error);
 });
+

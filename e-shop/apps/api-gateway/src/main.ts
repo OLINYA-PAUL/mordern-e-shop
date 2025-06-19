@@ -5,8 +5,6 @@
 
 import express from "express";
 import cors from "cors";
-import axios from "axios";
-import swaggerUi from "swagger-ui-express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import proxy from "express-http-proxy";
