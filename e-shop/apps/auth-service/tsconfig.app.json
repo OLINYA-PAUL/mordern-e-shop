@@ -1,6 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
     "outDir": "out-tsc/auth-service",
     "types": [
       "node", "express"
@@ -12,7 +14,9 @@
     "src/**/*.ts",
     "../../packages/**/*.ts",
     "swagger-output.json",
-    "src/swagger.ts"
+    "src/swagger.js",
+    "src",
+    "src/**/*.json"
 ],
   "exclude": [
     "out-tsc",

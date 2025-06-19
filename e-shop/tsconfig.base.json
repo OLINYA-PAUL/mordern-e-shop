@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "composite": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
     "declarationMap": true,
     "baseUrl": ".",
     "emitDeclarationOnly": true,

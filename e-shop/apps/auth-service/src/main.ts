@@ -24,9 +24,9 @@
 //   res.send({ message: "Hello API" });
 // });
 
-// app.use("/swagger-api", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-// app.use("/doc-swagger", (req: Request, res: Response) => {
-//   res.send({ message: "Hello swagger appi" });
+// app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// app.get("/docs-json", (req: Request, res: Response) => {
+//   res.send(swaggerDocument);
 // });
 // app.use("/api/v1", authrouter);
 
@@ -42,25 +42,7 @@
 //   console.error("Server Error", error);
 // });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// =================================================================
 
 import express, { Request, Response } from "express";
 import cors from "cors";
@@ -74,16 +56,15 @@ import path from "path";
 const app = express();
 
 // Optional Swagger file loading
-const swaggerPath = path.join(__dirname, "./", "swagger-output.json");
+const swaggerPath = path.join(__dirname, "..", "swagger-output.json");
 let swaggerDocument: any = null;
 
 if (fs.existsSync(swaggerPath)) {
   swaggerDocument = require(swaggerPath);
   console.log("✅ Swagger loaded successfully.");
+} else {
+  console.warn("⚠️ Swagger file not found. Skipping Swagger UI.");
 }
-// } else {
-//   console.warn("⚠️ Swagger file not found. Skipping Swagger UI.");
-// }
 
 app.use(
   cors({
@@ -101,13 +82,10 @@ app.get("/", (req, res) => {
   res.send({ message: "Hello API" });
 });
 
-// Conditionally load Swagger UI
-if (swaggerDocument) {
-  app.use("/swagger-api", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-  app.use("/doc-swagger", (req: Request, res: Response) => {
-    res.send({ message: "Hello swagger appi" });
-  });
-}
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.get("/docs-json", (req: Request, res: Response) => {
+  res.send(swaggerDocument);
+});
 
 app.use("/api/v1", authrouter);
 app.use(validationError);
@@ -115,12 +93,9 @@ app.use(validationError);
 // ✅ Start server
 const server = app.listen(port, () => {
   console.log(`✅ Auth service running at http://localhost:${port}/api`);
-  if (swaggerDocument) {
-    console.log(`📘 Swagger Docs at http://localhost:${port}/swagger-api`);
-  }
+  console.log(`📘 Swagger Docs at http://localhost:${port}/swagger-api-docs`);
 });
 
 server.on("error", (error) => {
   console.error("❌ Server Error", error);
 });
-
