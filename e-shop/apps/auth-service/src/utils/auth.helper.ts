@@ -6,26 +6,48 @@ import { ValidationError } from "../../../../packages/error-handler/appError";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// export const validateRegistrationData = (
+//   data: any,
+//   userType: "user" | "seller" = "user"
+// ) => {
+//   const { name, email, password, avater, phone_number, address, country } =
+//     data;
+
+//   if (
+//     !name ||
+//     !email ||
+//     !password ||
+//     !avater ||
+//     !address ||
+//     (userType === "seller" && !phone_number) ||
+//     !country
+//   ) {
+//     throw new ValidationError("All fields are required");
+//   }
+
+//   if (!emailRegex.test(email)) {
+//     throw new ValidationError("Invalid email format");
+//   }
+// };
+
 export const validateRegistrationData = (
   data: any,
-  userType: "admin" | "user" | "seller" = "user"
+  userType: "user" | "seller" = "user"
 ) => {
   const { name, email, password, avater, phone_number, address, country } =
     data;
 
-  if (
-    !name ||
-    !email ||
-    !password ||
-    !avater ||
-    !address ||
-    (userType === "seller" && !phone_number) ||
-    !country
-  ) {
-    throw new ValidationError("All fields are required");
+  if (!name || !email || !password) {
+    throw new ValidationError("Name, email and password are required");
   }
 
-  if (!emailRegex.test(email)) {
+  if (userType === "seller") {
+    if (!phone_number || !address || !country || !avater) {
+      throw new ValidationError("All seller fields are required");
+    }
+  }
+
+  if (typeof email !== "string" || !emailRegex.test(email.trim())) {
     throw new ValidationError("Invalid email format");
   }
 };
