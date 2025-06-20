@@ -7,8 +7,10 @@ import {
   checkOtpRestricTion,
   sendOtp,
   trackOtpRequest,
+  verifyOtp,
 } from "../../utils/auth.helper";
 import prisma from "../../lib/prisma";
+import bcrypt from "bcrypt";
 
 interface IAuth {
   email: string;
@@ -75,7 +77,7 @@ export const registerUser = async (
       throw new ValidationError("This email is already registered");
     }
 
-    await checkOtpRestricTion(email, next);
+    await checkOtpRestricTion(email);
     await trackOtpRequest(email, next);
     await sendOtp(name, email, "user-activation-mail");
 
@@ -85,6 +87,55 @@ export const registerUser = async (
     });
   } catch (error: any) {
     console.error("Error in registerUser:", error);
+    next(error); // So the error middleware can respond
+  }
+};
+
+interface IOtpVerification {
+  otp: string;
+  email: string;
+  name: string;
+  password?: string;
+}
+
+export const verifyUserOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { otp, email, password, name } = req.body as IOtpVerification;
+
+    if (!email || !name || !password) {
+      throw new ValidationError("Fields are required for  verification");
+    }
+
+    if (!otp) {
+      throw new ValidationError("OTP is required for verification");
+    }
+
+    const userExist = await prisma.users.findUnique({
+      where: { email: email }, // Check if user already exists
+    });
+
+    if (userExist) {
+      throw new ValidationError("This email is already registered");
+    }
+
+    await verifyOtp(email, otp, next);
+
+    const hashPassword = await bcrypt.hash(password, 10); // Hash the password
+    const user = await prisma.users.create({
+      data: { email, name, password: hashPassword },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "User registered successfully",
+      user,
+    });
+  } catch (error) {
+    console.log("Error in verifyUserOtp:", error);
     next(error); // So the error middleware can respond
   }
 };
