@@ -11,6 +11,8 @@ import {
 } from "../../utils/auth.helper";
 import prisma from "../../lib/prisma";
 import bcrypt from "bcrypt";
+import { accessToken, refressToken } from "../../utils/jwt";
+import { setCookies } from "../../utils/jwt/cookies";
 
 interface IAuth {
   email: string;
@@ -106,12 +108,8 @@ export const verifyUserOtp = async (
   try {
     const { otp, email, password, name } = req.body as IOtpVerification;
 
-    if (!email || !name || !password) {
-      throw new ValidationError("Fields are required for  verification");
-    }
-
-    if (!otp) {
-      throw new ValidationError("OTP is required for verification");
+    if (!email || !name || !password || !otp) {
+      throw new ValidationError("all fields are required for verification");
     }
 
     const userExist = await prisma.users.findUnique({
@@ -137,5 +135,48 @@ export const verifyUserOtp = async (
   } catch (error) {
     console.log("Error in verifyUserOtp:", error);
     next(error); // So the error middleware can respond
+  }
+};
+
+export const loginUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { email, password } = req.body as IAuth;
+
+    if (!email || !password) {
+      throw new ValidationError("Email and password are required");
+    }
+
+    const user = await prisma.users.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new ValidationError("User not found");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password!);
+    if (!isPasswordValid) {
+      throw new ValidationError("Invalid password");
+    }
+
+    // Here you would typically generate a JWT token and send it back
+    const access_token = accessToken({ userId: user.id, role: "user" });
+    const refress_token = refressToken({ userId: user.id, role: "user" });
+
+    setCookies(res, "access_token", access_token);
+    setCookies(res, "refress_token", refress_token);
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user: { id: user.id, email: user.email, name: user.name },
+    });
+  } catch (error) {
+    console.error("Error in userLogin:", error);
+    next(error);
   }
 };
