@@ -151,6 +151,16 @@
           }
         }
       }
+    },
+    "/logout-user": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   }
 }
