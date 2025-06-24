@@ -283,22 +283,3 @@ export const logOutUser = async (
     next(error);
   }
 };
-
-export const logOutUsedr = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    res.clearCookie("access_token", { maxAge: 0 });
-    res.clearCookie("refresh_token", { maxAge: 0 });
-
-    res.status(200).json({
-      success: true,
-      message: "Logged out successfully",
-    });
-  } catch (error) {
-    console.error("Error in logging out user:", error);
-    next(error);
-  }
-};
