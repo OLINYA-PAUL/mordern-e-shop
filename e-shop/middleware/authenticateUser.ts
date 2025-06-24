@@ -13,7 +13,9 @@ export const authenticateUser = (
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!);
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET!) as
+      | string
+      | jwt.JwtPayload;
     req.user = decoded; // You need to extend Request type to allow this
     next();
   } catch (err) {
