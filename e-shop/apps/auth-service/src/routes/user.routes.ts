@@ -5,6 +5,7 @@ import {
   verifyUserOtp,
   requestPasswordReset,
   resetUserPassword,
+  verifyForgetPasswordOtp,
   logOutUser,
 } from "../controllers/auth/auth-controller";
 
@@ -15,6 +16,7 @@ authrouter.post("/veriify-user", verifyUserOtp);
 authrouter.post("/login-user", loginUser);
 authrouter.post("/request-passwordreset", requestPasswordReset);
 authrouter.post("/reset-password", resetUserPassword);
+authrouter.post("/verify-otp", verifyForgetPasswordOtp);
 authrouter.post("/logout-user", logOutUser);
 
 export default authrouter;

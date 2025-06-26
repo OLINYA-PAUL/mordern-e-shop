@@ -192,7 +192,6 @@ export const requestPasswordReset = async (
   await handleForgetPassword(req, res, next, "user");
 };
 
-
 export const verifyForgetPasswordOtp = async (
   req: Request,
   res: Response,
@@ -201,16 +200,13 @@ export const verifyForgetPasswordOtp = async (
   await handleVerifyForgetPasswordOtp(req, res, next);
 };
 
-
 export const resetUserPassword = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  await handleSendOtp(req, res, next, "user");
+  await handleSendOtp(req, res, next);
 };
-
-
 
 export const logOutUser = async (
   req: Request,
@@ -230,4 +226,3 @@ export const logOutUser = async (
     next(error);
   }
 };
-
