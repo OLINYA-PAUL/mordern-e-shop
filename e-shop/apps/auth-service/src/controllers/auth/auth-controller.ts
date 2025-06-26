@@ -8,11 +8,14 @@ import {
   sendOtp,
   trackOtpRequest,
   verifyOtp,
+  handleForgetPassword,
+  handleSendOtp,
+  handleVerifyForgetPasswordOtp,
 } from "../../utils/auth.helper";
 import prisma from "../../lib/prisma";
-import bcrypt from "bcrypt";
 import { accessToken, refressToken } from "../../utils/jwt";
 import { setCookies } from "../../utils/jwt/cookies";
+import bcrypt from "bcrypt";
 
 interface IAuth {
   email: string;
@@ -186,84 +189,28 @@ export const requestPasswordReset = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { email } = req.body;
-
-  if (!email) {
-    throw new ValidationError("Email is required");
-  }
-
-  try {
-    const user = await prisma.users.findUnique({ where: { email } });
-
-    if (!user) {
-      throw new ValidationError("User not found");
-    }
-
-    await checkOtpRestricTion(email);
-    await trackOtpRequest(email, next);
-    await sendOtp(user.name!, email, "user-activation-mail");
-
-    res.status(200).json({
-      success: true,
-      message: "OTP sent to your email",
-    });
-  } catch (error) {
-    console.error("Error requesting password reset:", error);
-    next(error);
-  }
+  await handleForgetPassword(req, res, next, "user");
 };
 
-interface IResetPassword {
-  email: string;
-  password: string;
-  otp: string;
-}
+
+export const verifyForgetPasswordOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  await handleVerifyForgetPasswordOtp(req, res, next);
+};
+
 
 export const resetUserPassword = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { email, password, otp } = req.body as IResetPassword;
-
-  if (!email || !password || !otp) {
-    throw new ValidationError("All fields are required");
-  }
-
-  try {
-    const user = await prisma.users.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      throw new ValidationError("User not found");
-    }
-
-    await verifyOtp(email, otp, next);
-
-    const isSamePassword = await bcrypt.compare(password, user.password!);
-    if (isSamePassword) {
-      throw new ValidationError(
-        "New password must be different from the old one"
-      );
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    await prisma.users.update({
-      where: { email },
-      data: { password: hashedPassword },
-    });
-
-    res.status(200).json({
-      success: true,
-      message: "Password reset successfully",
-    });
-  } catch (error) {
-    console.error("Error in Reseting password:", error);
-    next(error);
-  }
+  await handleSendOtp(req, res, next, "user");
 };
+
+
 
 export const logOutUser = async (
   req: Request,
@@ -283,3 +230,4 @@ export const logOutUser = async (
     next(error);
   }
 };
+
