@@ -5,6 +5,7 @@ import {
   verifyUserOtp,
   requestPasswordReset,
   resetUserPassword,
+  logOutUser,
 } from "../controllers/auth/auth-controller";
 
 const authrouter: Router = express.Router();
@@ -14,5 +15,6 @@ authrouter.post("/veriify-user", verifyUserOtp);
 authrouter.post("/login-user", loginUser);
 authrouter.post("/request-passwordreset", requestPasswordReset);
 authrouter.post("/reset-password", resetUserPassword);
+authrouter.post("/logout-user", logOutUser);
 
 export default authrouter;
