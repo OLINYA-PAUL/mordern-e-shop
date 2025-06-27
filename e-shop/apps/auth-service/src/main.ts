@@ -68,7 +68,7 @@ if (fs.existsSync(swaggerPath)) {
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", " http://localhost:4200"],
     allowedHeaders: ["Authorization", "Content-Type"],
     credentials: true,
   })
