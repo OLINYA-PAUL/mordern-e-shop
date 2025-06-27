@@ -108,6 +108,16 @@
         }
       }
     },
+    "/verify-otp": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/reset-password": {
       "post": {
         "description": "",
