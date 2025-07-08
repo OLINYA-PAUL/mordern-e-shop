@@ -11,6 +11,8 @@
   },
   "private": true,
   "dependencies": {
+    "@hookform/resolvers": "^5.1.1",
+    "@tanstack/react-query": "^5.81.5",
     "axios": "^1.9.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
@@ -27,8 +29,10 @@
     "nodemailer": "^7.0.3",
     "react": "19.0.0",
     "react-dom": "19.0.0",
+    "react-hook-form": "^7.59.0",
     "swagger-autogen": "^2.23.7",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@nx/esbuild": "21.1.2",
