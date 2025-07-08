@@ -1,3 +1,4 @@
+import { Provider } from '../Provider';
 import { Header } from '../shared';
 import './global.css';
 
@@ -31,7 +32,9 @@ export default function RootLayout({
     <html lang="en" className={`${roboto.variable} ${poppins.variable}`}>
       <body className="w-full">
         <Header />
-        <main className="w-full">{children}</main>
+        <main className="w-full">
+          <Provider>{children}</Provider>
+        </main>
       </body>
     </html>
   );
