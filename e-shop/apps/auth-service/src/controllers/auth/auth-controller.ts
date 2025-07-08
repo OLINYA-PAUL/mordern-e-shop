@@ -1,5 +1,5 @@
-import { NextFunction, Response, Request } from "express";
-import { ValidationError } from "@packages/error-handler/appError";
+import { NextFunction, Response, Request } from 'express';
+import { ValidationError } from '@packages/error-handler/appError';
 // import { ValidationError } from "../../../../../packages/error-handler/appError";
 
 import {
@@ -11,11 +11,11 @@ import {
   handleForgetPassword,
   handleSendOtp,
   handleVerifyForgetPasswordOtp,
-} from "../../utils/auth.helper";
-import prisma from "../../lib/prisma";
-import { accessToken, refressToken } from "../../utils/jwt";
-import { setCookies } from "../../utils/jwt/cookies";
-import bcrypt from "bcrypt";
+} from '../../utils/auth.helper';
+import prisma from '../../lib/prisma';
+import { accessToken, refressToken } from '../../utils/jwt';
+import { setCookies } from '../../utils/jwt/cookies';
+import bcrypt from 'bcrypt';
 
 interface IAuth {
   email: string;
@@ -73,25 +73,25 @@ export const registerUser = async (
   try {
     const { email, name } = req.body as IAuth;
 
-    validateRegistrationData(req.body, "user");
+    validateRegistrationData(req.body, 'user');
 
     const userExist = await prisma.users.findUnique({
       where: { email },
     });
     if (userExist) {
-      throw new ValidationError("This email is already registered");
+      throw new ValidationError('This email is already registered');
     }
 
     await checkOtpRestricTion(email);
     await trackOtpRequest(email, next);
-    await sendOtp(name, email, "user-activation-mail");
+    await sendOtp(name, email, 'user-activation-mail');
 
     res.status(201).json({
       success: true,
-      message: "Otp sent to your email please verify your account",
+      message: 'Otp sent to your email please verify your account',
     });
   } catch (error: any) {
-    console.error("Error in registerUser:", error);
+    console.error('Error in registerUser:', error);
     next(error); // So the error middleware can respond
   }
 };
@@ -112,7 +112,7 @@ export const verifyUserOtp = async (
     const { otp, email, password, name } = req.body as IOtpVerification;
 
     if (!email || !name || !password || !otp) {
-      throw new ValidationError("all fields are required for verification");
+      throw new ValidationError('all fields are required for verification');
     }
 
     const userExist = await prisma.users.findUnique({
@@ -120,10 +120,10 @@ export const verifyUserOtp = async (
     });
 
     if (userExist) {
-      throw new ValidationError("This email is already registered");
+      throw new ValidationError('This email is already registered');
     }
 
-    await verifyOtp(email, otp, next);
+    await verifyOtp(email, otp);
 
     const hashPassword = await bcrypt.hash(password, 10); // Hash the password
     const user = await prisma.users.create({
@@ -132,11 +132,11 @@ export const verifyUserOtp = async (
 
     res.status(200).json({
       success: true,
-      message: "User registered successfully",
+      message: 'User registered successfully',
       user,
     });
   } catch (error) {
-    console.log("Error in verifyUserOtp:", error);
+    console.log('Error in verifyUserOtp:', error);
     next(error); // So the error middleware can respond
   }
 };
@@ -150,7 +150,7 @@ export const loginUser = async (
     const { email, password } = req.body as IAuth;
 
     if (!email || !password) {
-      throw new ValidationError("Email and password are required");
+      throw new ValidationError('Email and password are required');
     }
 
     const user = await prisma.users.findUnique({
@@ -158,28 +158,28 @@ export const loginUser = async (
     });
 
     if (!user) {
-      throw new ValidationError("User not found");
+      throw new ValidationError('User not found');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password!);
     if (!isPasswordValid) {
-      throw new ValidationError("Invalid password");
+      throw new ValidationError('Invalid password');
     }
 
     // Here you would typically generate a JWT token and send it back
-    const access_token = accessToken({ userId: user.id, role: "user" });
-    const refress_token = refressToken({ userId: user.id, role: "user" });
+    const access_token = accessToken({ userId: user.id, role: 'user' });
+    const refress_token = refressToken({ userId: user.id, role: 'user' });
 
-    setCookies(res, "access_token", access_token);
-    setCookies(res, "refress_token", refress_token);
+    setCookies(res, 'access_token', access_token);
+    setCookies(res, 'refress_token', refress_token);
 
     res.status(200).json({
       success: true,
-      message: "Login successful",
+      message: 'Login successful',
       user: { id: user.id, email: user.email, name: user.name },
     });
   } catch (error) {
-    console.error("Error in userLogin:", error);
+    console.error('Error in userLogin:', error);
     next(error);
   }
 };
@@ -189,7 +189,7 @@ export const requestPasswordReset = async (
   res: Response,
   next: NextFunction
 ) => {
-  await handleForgetPassword(req, res, next, "user");
+  await handleForgetPassword(req, res, next, 'user');
 };
 
 export const verifyForgetPasswordOtp = async (
@@ -214,15 +214,15 @@ export const logOutUser = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    res.clearCookie("access_token", { maxAge: 0 });
-    res.clearCookie("refresh_token", { maxAge: 0 });
+    res.clearCookie('access_token', { maxAge: 0 });
+    res.clearCookie('refresh_token', { maxAge: 0 });
 
     res.status(200).json({
       success: true,
-      message: "Logged out successfully",
+      message: 'Logged out successfully',
     });
   } catch (error) {
-    console.error("Error in logging out user:", error);
+    console.error('Error in logging out user:', error);
     next(error);
   }
 };

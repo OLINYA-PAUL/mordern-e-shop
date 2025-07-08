@@ -1,4 +1,6 @@
 import { Provider } from '../Provider';
+import { Toaster } from 'react-hot-toast';
+
 import { Header } from '../shared';
 import './global.css';
 
@@ -33,7 +35,10 @@ export default function RootLayout({
       <body className="w-full">
         <Header />
         <main className="w-full">
-          <Provider>{children}</Provider>
+          <Provider>
+            {children}
+            <Toaster />
+          </Provider>
         </main>
       </body>
     </html>

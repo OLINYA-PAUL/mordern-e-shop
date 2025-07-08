@@ -1,8 +1,8 @@
 import express, { Router } from 'express';
 import {
   loginUser,
-  registerUser,
   verifyUserOtp,
+  registerUser,
   requestPasswordReset,
   resetUserPassword,
   verifyForgetPasswordOtp,
@@ -12,7 +12,7 @@ import {
 const authrouter: Router = express.Router();
 
 authrouter.post('/user-registration', registerUser);
-authrouter.post('/veriify-user', verifyUserOtp);
+authrouter.post('/verify-user', verifyUserOtp);
 authrouter.post('/login-user', loginUser);
 authrouter.post('/request-passwordreset', requestPasswordReset);
 authrouter.post('/verify-otp', verifyForgetPasswordOtp);

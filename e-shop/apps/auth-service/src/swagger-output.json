@@ -38,7 +38,7 @@
         }
       }
     },
-    "/veriify-user": {
+    "/verify-user": {
       "post": {
         "description": "",
         "parameters": [

@@ -11,11 +11,13 @@ import { Eye, EyeClosed } from 'lucide-react';
 import Link from 'next/link';
 import { useMutation } from '@tanstack/react-query';
 import { axiosBaseUrl, axiosErr } from 'apps/user-ui/src/configs/axios';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 const SignUp = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [canResend, setCanResend] = useState(false);
-  const [timer, setTimer] = useState(300);
+  const [timer, setTimer] = useState(60);
   const [otp, setOtp] = useState<string[]>(['', '', '', '']);
   const [userData, setUserData] = useState<formTypes | null>(null);
   const inputRef = useRef<(HTMLInputElement | null)[]>([]);
@@ -41,6 +43,37 @@ const SignUp = () => {
     if (value && inputRef.current[index + 1]) {
       inputRef.current[index + 1]?.focus(); // Move forward
     }
+  };
+
+  const verifyUserOtpMutation = useMutation({
+    mutationFn: async () => {
+      if (!userData) return;
+
+      const res = await axiosBaseUrl.post('/verify-user', {
+        ...userData,
+        otp: otp.join('').trim(),
+      });
+
+      const msg = res?.data?.message || 'Account Created successfully';
+      toast.success(msg);
+
+      return res.data;
+    },
+    onSuccess: () => {
+      router.push('/login');
+    },
+    onError: (err: any) => {
+      console.log({ 'otp err': err });
+      if (err instanceof AxiosError) {
+        const msg = err?.response?.data?.error || 'Failed to verify otp';
+        setServerError(msg);
+        toast.error(msg);
+      }
+    },
+  });
+
+  const handleVerifyOtp = async () => {
+    verifyUserOtpMutation.mutate();
   };
 
   const startResendTimer = () => {
@@ -72,6 +105,9 @@ const SignUp = () => {
     mutationFn: async (data: formTypes) => {
       const res = await axiosBaseUrl.post(`/user-registration`, data);
       console.log({ resbody: res.data });
+
+      const msg = res?.data?.message || 'OTP sent to your email';
+      toast.success(msg);
       return res.data;
     },
     onSuccess: (_, formTypes) => {
@@ -83,7 +119,15 @@ const SignUp = () => {
       startResendTimer();
     },
     onError: (err: any) => {
-      setServerError(err.message);
+      console.log('user error', err);
+      if (err instanceof AxiosError) {
+        const msg =
+          err?.response?.data?.message ||
+          err.message ||
+          'Failed to create account';
+        setServerError(msg);
+        toast.error(msg);
+      }
     },
   });
 
@@ -158,12 +202,20 @@ const SignUp = () => {
               </div>
               <button
                 className={`${
-                  otp.some((digit) => digit === '') && 'bg-slate-300'
+                  otp.some(
+                    (digit) => digit === '' || verifyUserOtpMutation.isPending
+                  ) && 'bg-slate-300'
                 } bg-blue-500 text-sm text-white font-poppins font-semibold mt-5 w-full outline-none border-none py-2 px-4 rounded-full`}
-                disabled={otp.some((digit) => digit === '')}
+                disabled={
+                  otp.some((digit) => digit === '') ||
+                  verifyUserOtpMutation.isPending
+                }
                 type="button"
+                onClick={handleVerifyOtp}
               >
-                Verify OTP
+                {verifyUserOtpMutation.isPending
+                  ? 'Please wait...'
+                  : 'Verify OTP'}
               </button>
               <div className="text-center text-sm mt-5">
                 {canResend ? (
@@ -176,12 +228,12 @@ const SignUp = () => {
                 ) : (
                   <p className="text-xs font-poppins text-blue-500">
                     Resend OTP in{' '}
-                    {/* <span className="text-red-600">
-                      {timer === 60 ? '1m' : `${timer}s`}
-                    </span> */}
                     <span className="text-red-600">
-                      {`${Math.floor(timer / 60)}m ${timer % 60}s`}
+                      {timer === 60 ? '1m' : `${timer}s`}
                     </span>
+                    {/* <span className="text-red-600">
+                      {`${Math.floor(timer / 60)}m ${timer % 60}s`}
+                    </span> */}
                   </p>
                 )}
               </div>
@@ -247,20 +299,23 @@ const SignUp = () => {
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full bg-black text-white py-2 px-3 mt-2 rounded-md font-medium text-xs hover:bg-gray-800 transition-colors"
+                className={`${
+                  signUpMutation.isPending && 'cursor-not-allowed'
+                } w-full bg-black text-white py-2 px-3 mt-2 rounded-md font-medium text-xs hover:bg-gray-800 transition-colors`}
+                disabled={signUpMutation.isPending}
               >
                 {signUpMutation.isPending ? 'Please wait...' : 'Sign Up'}
               </button>
             </form>
           )}
 
-          <div className="text-left mt-5">
+          {/* <div className="text-left mt-5">
             {serverError && (
               <p className="text-red-600 font-poppins text-xs" aria-readonly>
                 {serverError}
               </p>
             )}
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
