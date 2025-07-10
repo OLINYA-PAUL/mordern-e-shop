@@ -31,3 +31,10 @@ export const userSchema = yup
     email: yup.string().required(),
   })
   .required();
+
+export const LoginSchema = yup
+  .object({
+    email: yup.string().required(),
+    password: yup.string().required(),
+  })
+  .required();

@@ -6,8 +6,8 @@ export interface NavItmesTypes {
 }
 [];
 
-export interface formTypes {
-  name: string;
+export interface formData {
+  name?: string;
   password: string;
   email: string;
 }

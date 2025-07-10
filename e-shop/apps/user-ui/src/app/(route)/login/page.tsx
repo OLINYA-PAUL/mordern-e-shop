@@ -3,19 +3,21 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { userSchema } from 'apps/user-ui/src/configs/constants/constants';
-import { formTypes } from 'apps/user-ui/src/configs/constants/global.d.types';
+import { LoginSchema } from 'apps/user-ui/src/configs/constants/constants';
+import { formData } from 'apps/user-ui/src/configs/constants/global.d.types';
 import SVGComponent from 'apps/user-ui/src/shared/components';
 import styles from 'apps/user-ui/src/styles/styles';
 import { Eye, EyeClosed } from 'lucide-react';
 import Link from 'next/link';
+import { useMutation } from '@tanstack/react-query';
+import { axiosBaseUrl } from 'apps/user-ui/src/configs/axios';
+import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 const Login = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(
-    'Please try again in next 30 minutes!'
-  );
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -23,12 +25,44 @@ const Login = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<formTypes>({
-    resolver: yupResolver(userSchema),
+  } = useForm<formData>({
+    resolver: yupResolver(LoginSchema),
   });
 
-  const onSubmit: SubmitHandler<formTypes> = (data) => console.log(data);
   // h-[85vh]
+  const onSubmit: SubmitHandler<formData> = (data) => {
+    console.log({ singupData: data });
+    dataEmpty(data);
+    signInMutation.mutate(data);
+  };
+
+  const dataEmpty = (data: formData) => {
+    Object.values(data).some((items) => items === '' || !items);
+  };
+
+  const signInMutation = useMutation({
+    mutationFn: async (data: formData) => {
+      const res = await axiosBaseUrl.post(`/login-user`, data);
+      console.log({ resbody: res.data });
+
+      const msg = res?.data?.message || 'Sign in successful';
+      toast.success(msg);
+      return res.data;
+    },
+    onSuccess: (_, formData) => {
+      router.push('/');
+      setServerError('');
+    },
+    onError: (err: any) => {
+      console.log('user error', err);
+      if (err instanceof AxiosError) {
+        const msg = err?.response?.data?.error || 'Failed to Sign in';
+        setServerError(msg);
+        toast.error(msg);
+      }
+    },
+  });
+
   return (
     <div className="w-full mx-auto bg-[#fcfcf3]  p-6 ">
       <div className="text-xl font-roboto font-semibold text-black text-center">
@@ -38,7 +72,8 @@ const Login = () => {
         We are happy to have you back!
       </p>
       <div className="w-full flex items-center justify-center flex-col">
-        <div className="md:w-[25%] shadow-sm bg-white p-4 rounded-md">
+        <div className="w-full sm:w-[90%] md:w-[60%] lg:w-[40%] xl:w-[25%] shadow-sm bg-white p-4 sm:p-5 rounded-md">
+          {' '}
           <h3 className="text-sm font-extrabold font-roboto text-center text-[#00000099] mb-1">
             Login to Eshop
           </h3>
@@ -127,9 +162,12 @@ const Login = () => {
             {/* Submit */}
             <button
               type="submit"
-              className="w-full bg-black text-white py-2 px-3 rounded-md font-medium text-xs hover:bg-gray-800 transition-colors"
+              className={`${
+                signInMutation.isPending && 'cursor-not-allowed'
+              } w-full bg-black text-white py-2 px-3 mt-2 rounded-md font-medium text-xs hover:bg-gray-800 transition-colors`}
+              disabled={signInMutation.isPending}
             >
-              Login
+              {signInMutation.isPending ? 'Please wait...' : 'Login'}
             </button>
           </form>
           <div className="text-left mt-5">

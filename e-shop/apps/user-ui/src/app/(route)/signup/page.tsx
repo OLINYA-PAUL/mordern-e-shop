@@ -4,13 +4,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { userSchema } from 'apps/user-ui/src/configs/constants/constants';
-import { formTypes } from 'apps/user-ui/src/configs/constants/global.d.types';
+import { formData } from 'apps/user-ui/src/configs/constants/global.d.types';
 import SVGComponent from 'apps/user-ui/src/shared/components';
 import styles from 'apps/user-ui/src/styles/styles';
-import { Eye, EyeClosed } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useMutation } from '@tanstack/react-query';
-import { axiosBaseUrl, axiosErr } from 'apps/user-ui/src/configs/axios';
+import { axiosBaseUrl } from 'apps/user-ui/src/configs/axios';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
@@ -19,20 +19,23 @@ const SignUp = () => {
   const [canResend, setCanResend] = useState(false);
   const [timer, setTimer] = useState(60);
   const [otp, setOtp] = useState<string[]>(['', '', '', '']);
-  const [userData, setUserData] = useState<formTypes | null>(null);
+  const [userData, setUserData] = useState<formData | null>(null);
   const inputRef = useRef<(HTMLInputElement | null)[]>([]);
   const [showOtp, setShowOtp] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
   const router = useRouter();
+  const dataEmpty = (data: formData) => {
+    Object.values(data).some((items) => items === '' || !items);
+  };
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<formTypes>({
+  } = useForm<formData>({
     resolver: yupResolver(userSchema),
-  });
+  } as any);
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return; // Only allow digits
@@ -89,7 +92,7 @@ const SignUp = () => {
     }, 1000);
   };
 
-  const onSubmit: SubmitHandler<formTypes> = (data) => {
+  const onSubmit: SubmitHandler<formData> = (data) => {
     signUpMutation.mutate(data);
   };
 
@@ -102,7 +105,7 @@ const SignUp = () => {
   };
 
   const signUpMutation = useMutation({
-    mutationFn: async (data: formTypes) => {
+    mutationFn: async (data: formData) => {
       const res = await axiosBaseUrl.post(`/user-registration`, data);
       console.log({ resbody: res.data });
 
@@ -110,8 +113,8 @@ const SignUp = () => {
       toast.success(msg);
       return res.data;
     },
-    onSuccess: (_, formTypes) => {
-      setUserData(formTypes);
+    onSuccess: (_, formData) => {
+      setUserData(formData);
       setTimer(60);
       setShowOtp(true);
       setCanResend(false);
@@ -121,10 +124,7 @@ const SignUp = () => {
     onError: (err: any) => {
       console.log('user error', err);
       if (err instanceof AxiosError) {
-        const msg =
-          err?.response?.data?.message ||
-          err.message ||
-          'Failed to create account';
+        const msg = err?.response?.data?.error || 'Failed to create account';
         setServerError(msg);
         toast.error(msg);
       }
@@ -144,7 +144,7 @@ const SignUp = () => {
         We are happy to have you back!
       </p>
       <div className="w-full flex items-center justify-center flex-col">
-        <div className="md:w-[25%] shadow-sm bg-white p-4 rounded-md">
+        <div className="w-full sm:w-[90%] md:w-[60%] lg:w-[40%] xl:w-[25%] shadow-sm bg-white p-4 sm:p-5 rounded-md">
           <h3 className="text-sm font-extrabold font-roboto text-center text-[#00000099] mb-1">
             Sign up to Eshop
           </h3>
@@ -283,11 +283,7 @@ const SignUp = () => {
                   className="cursor-pointer"
                   type="button"
                 >
-                  {isPasswordVisible ? (
-                    <Eye size={16} />
-                  ) : (
-                    <EyeClosed size={16} />
-                  )}
+                  {isPasswordVisible ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
               </div>
               {errors.password && (
