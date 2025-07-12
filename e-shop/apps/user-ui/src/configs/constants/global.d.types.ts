@@ -7,7 +7,7 @@ export interface NavItmesTypes {
 [];
 
 export interface formData {
-  name?: string;
+  name: string;
   password: string;
   email: string;
 }

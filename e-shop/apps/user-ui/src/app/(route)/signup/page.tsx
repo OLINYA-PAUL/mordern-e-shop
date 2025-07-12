@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { userSchema } from 'apps/user-ui/src/configs/constants/constants';
+import { SingUpSchema } from 'apps/user-ui/src/configs/constants/constants';
 import { formData } from 'apps/user-ui/src/configs/constants/global.d.types';
 import SVGComponent from 'apps/user-ui/src/shared/components';
 import styles from 'apps/user-ui/src/styles/styles';
@@ -25,17 +25,21 @@ const SignUp = () => {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const router = useRouter();
-  const dataEmpty = (data: formData) => {
-    Object.values(data).some((items) => items === '' || !items);
-  };
+  // const dataEmpty = Object.values(FormData || userData).some(
+  //   (items) => items === '' || !items
+  // );
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<formData>({
-    resolver: yupResolver(userSchema),
+    resolver: yupResolver(SingUpSchema),
   } as any);
+
+  const inputs = watch(['email', 'password', 'name']); // returns current values
+  const dataEmpty = inputs.some((v) => !v);
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^\d*$/.test(value)) return; // Only allow digits
@@ -240,21 +244,6 @@ const SignUp = () => {
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)}>
-              {/* Email */}
-              <div className="w-full mb-2">
-                <input
-                  type="text"
-                  className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px]`}
-                  placeholder="Enter your Email"
-                  {...register('email')}
-                />
-                {errors.email && (
-                  <p className="text-[11px] font-poppins text-red-500 mt-1">
-                    {String(errors.email.message)}
-                  </p>
-                )}
-              </div>
-
               {/* Name */}
               <div className="w-full mb-2">
                 <input
@@ -266,6 +255,20 @@ const SignUp = () => {
                 {errors.name && (
                   <p className="text-[11px] font-poppins text-red-500 mt-1">
                     {String(errors.name.message)}
+                  </p>
+                )}
+              </div>
+              {/* Email */}
+              <div className="w-full mb-2">
+                <input
+                  type="text"
+                  className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px]`}
+                  placeholder="Enter your Email"
+                  {...register('email')}
+                />
+                {errors.email && (
+                  <p className="text-[11px] font-poppins text-red-500 mt-1">
+                    {String(errors.email.message)}
                   </p>
                 )}
               </div>
@@ -296,9 +299,10 @@ const SignUp = () => {
               <button
                 type="submit"
                 className={`${
-                  signUpMutation.isPending && 'cursor-not-allowed'
-                } w-full bg-black text-white py-2 px-3 mt-2 rounded-md font-medium text-xs hover:bg-gray-800 transition-colors`}
-                disabled={signUpMutation.isPending}
+                  signUpMutation.isPending ||
+                  (dataEmpty && 'cursor-not-allowed bg-slate-400')
+                } w-full bg-black text-white py-2 px-3 mt-2 rounded-md font-medium text-xs transition-colors`}
+                disabled={signUpMutation.isPending || dataEmpty}
               >
                 {signUpMutation.isPending ? 'Please wait...' : 'Sign Up'}
               </button>

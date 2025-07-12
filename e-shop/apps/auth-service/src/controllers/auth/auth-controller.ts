@@ -9,7 +9,7 @@ import {
   trackOtpRequest,
   verifyOtp,
   handleForgetPassword,
-  handleSendOtp,
+  handleResetPassword,
   handleVerifyForgetPasswordOtp,
 } from '../../utils/auth.helper';
 import prisma from '../../lib/prisma';
@@ -205,7 +205,7 @@ export const resetUserPassword = async (
   res: Response,
   next: NextFunction
 ) => {
-  await handleSendOtp(req, res, next);
+  await handleResetPassword(req, res, next);
 };
 
 export const logOutUser = async (
