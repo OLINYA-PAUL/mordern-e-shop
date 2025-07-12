@@ -223,7 +223,7 @@ interface IResetPassword {
   otp: string;
 }
 
-export const handleSendOtp = async (
+export const handleResetPassword = async (
   req: Request,
   res: Response,
   next: NextFunction
