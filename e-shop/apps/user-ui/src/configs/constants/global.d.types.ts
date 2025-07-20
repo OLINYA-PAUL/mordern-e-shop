@@ -10,4 +10,5 @@ export interface formData {
   name: string;
   password: string;
   email: string;
+  rememberMe: boolean;
 }

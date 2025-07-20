@@ -36,6 +36,7 @@ export const LoginSchema = yup
   .object({
     email: yup.string().required(),
     password: yup.string().required(),
+    rememberMe: yup.boolean().optional(),
   })
   .required();
 

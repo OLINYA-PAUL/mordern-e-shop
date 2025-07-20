@@ -86,6 +86,9 @@
                 },
                 "password": {
                   "example": "any"
+                },
+                "rememberMe": {
+                  "example": "any"
                 }
               }
             }
@@ -94,6 +97,16 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/refress_token": {
+      "get": {
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
           }
         }
       }
@@ -130,6 +143,26 @@
     },
     "/logout-user": {
       "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/get-user": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/auth-user": {
+      "get": {
         "description": "",
         "responses": {
           "200": {
