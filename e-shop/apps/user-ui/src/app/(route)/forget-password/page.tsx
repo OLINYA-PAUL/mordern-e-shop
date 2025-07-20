@@ -11,6 +11,7 @@ import { useMutation } from '@tanstack/react-query';
 import { axiosBaseUrl } from 'apps/user-ui/src/configs/axios';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
+import Link from 'next/link';
 
 const ForgetPassword = () => {
   const router = useRouter();
@@ -59,7 +60,7 @@ const ForgetPassword = () => {
   });
 
   return (
-    <div className="w-full mx-auto bg-[#fcfcf3]  p-6 ">
+    <div className="w-full mx-auto bg-[#fcfcf3] p-6 h-[70vh]">
       <div className="text-xl font-roboto font-semibold text-black text-center">
         Reset Your Account
       </div>
@@ -68,6 +69,15 @@ const ForgetPassword = () => {
       </p>
       <div className="w-full flex items-center justify-center flex-col">
         <div className="w-full sm:w-[90%] md:w-[60%] lg:w-[40%] xl:w-[25%] shadow-sm bg-white p-4 sm:p-5 rounded-md">
+          <Link
+            href={'/login'}
+            className="text-xs font-roboto text-center py-1 mb-3 text-[#00000099] flex items-center justify-center "
+          >
+            Go back to
+            <span className="text-blue-600 font-poppins font-semibold text-xs text-center ml-2">
+              Login
+            </span>
+          </Link>
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Email */}
             <div className="w-full mb-2">

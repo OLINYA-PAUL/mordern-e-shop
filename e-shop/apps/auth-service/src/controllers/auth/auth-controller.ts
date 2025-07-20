@@ -1,6 +1,7 @@
 import { NextFunction, Response, Request } from 'express';
 import { ValidationError } from '@packages/error-handler/appError';
 // import { ValidationError } from "../../../../../packages/error-handler/appError";
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 import {
   validateRegistrationData,
@@ -16,11 +17,13 @@ import prisma from '../../lib/prisma';
 import { accessToken, refressToken } from '../../utils/jwt';
 import { setCookies } from '../../utils/jwt/cookies';
 import bcrypt from 'bcrypt';
+import { JsonWebTokenError } from 'jsonwebtoken';
 
 interface IAuth {
   email: string;
   name: string;
   password: string;
+  rememberMe: boolean;
 }
 
 // export const registerUser = async (
@@ -147,7 +150,7 @@ export const loginUser = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { email, password } = req.body as IAuth;
+    const { email, password, rememberMe = false } = req.body as IAuth;
 
     if (!email || !password) {
       throw new ValidationError('Email and password are required');
@@ -167,11 +170,11 @@ export const loginUser = async (
     }
 
     // Here you would typically generate a JWT token and send it back
-    const access_token = accessToken({ userId: user.id, role: 'user' });
-    const refress_token = refressToken({ userId: user.id, role: 'user' });
+    const access_token = accessToken({ id: user.id, role: 'user' });
+    const refress_token = refressToken({ id: user.id, role: 'user' });
 
-    setCookies(res, 'access_token', access_token);
-    setCookies(res, 'refress_token', refress_token);
+    setCookies(res, 'access_token', access_token, rememberMe);
+    setCookies(res, 'refress_token', refress_token, rememberMe);
 
     res.status(200).json({
       success: true,
@@ -208,6 +211,53 @@ export const resetUserPassword = async (
   await handleResetPassword(req, res, next);
 };
 
+export const refressUserToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const refreshToken = req.cookies.refress_token.toString();
+
+    if (!refreshToken) {
+      throw new ValidationError('Unauthorized! No refresh token');
+    }
+    // const rawToken = refreshToken.replace(/^"|"$/g, '');
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.REFRESS_TOKEN_SECRET as string
+    ) as { id: string; role: string } | JwtPayload;
+
+    if (!decoded || !decoded.id || !decoded.role) {
+      throw new JsonWebTokenError('Forbidden! Invalid refresh token');
+    }
+
+    // Fetch user from database
+    const user = await prisma.users.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user) {
+      throw new ValidationError('User not found');
+    }
+
+    // Create new access token
+    const newAccessToken = jwt.sign(
+      { id: decoded.id, role: decoded.role },
+      process.env.ACCESS_TOKEN_SECRET as string,
+      { expiresIn: '15m' }
+    );
+
+    // Set new access token cookie
+    setCookies(res, 'access_token', newAccessToken, true);
+
+    res.status(201).json({ message: 'Access token refreshed' });
+  } catch (error) {
+    console.error('Error refreshing user token:', error);
+    next(error);
+  }
+};
+
 export const logOutUser = async (
   req: Request,
   res: Response,
@@ -223,6 +273,40 @@ export const logOutUser = async (
     });
   } catch (error) {
     console.error('Error in logging out user:', error);
+    next(error);
+  }
+};
+
+export const getUser = async (
+  req: Request,
+
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    //@ts-ignore
+    const userId = req.user?.id;
+
+    console.log('User ID from request:', userId);
+
+    if (!userId) {
+      throw new ValidationError('User ID not found in request');
+    }
+
+    const user = await prisma.users.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new ValidationError('User not found');
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error('Error fetching user:', error);
     next(error);
   }
 };

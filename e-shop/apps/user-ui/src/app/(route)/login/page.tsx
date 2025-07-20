@@ -25,6 +25,7 @@ const Login = () => {
     register,
     handleSubmit,
     watch,
+
     formState: { errors },
   } = useForm<formData>({
     resolver: yupResolver(LoginSchema) as any,
@@ -32,7 +33,7 @@ const Login = () => {
 
   // h-[85vh]
   const onSubmit: SubmitHandler<formData> = (data) => {
-    console.log({ singupData: data });
+    console.log({ LoginData: data });
     signInMutation.mutate(data);
   };
 
@@ -45,8 +46,10 @@ const Login = () => {
 
   const signInMutation = useMutation({
     mutationFn: async (data: formData) => {
-      const res = await axiosBaseUrl.post(`/login-user`, data);
-      console.log({ resbody: res.data });
+      const datas = { ...data, rememberMe };
+
+      const res = await axiosBaseUrl.post(`/login-user`, datas);
+      console.log({ resbody: datas }, 'and response', res.data);
 
       const msg = res?.data?.message || 'Sign in successful';
       toast.success(msg);
@@ -146,7 +149,7 @@ const Login = () => {
                   name="rememberme"
                   className="mr-2 !border-none !bg-[#f3f3ec] cursor-pointer  w-3 h-3"
                   checked={rememberMe}
-                  onChange={() => setRememberMe((prev) => !prev)}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                 />
                 <p className="font-poppins text-xs text-black">Remember me</p>
               </label>
