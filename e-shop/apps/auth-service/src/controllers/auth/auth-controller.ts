@@ -284,7 +284,6 @@ export const getUser = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    //@ts-ignore
     const userId = req.user?.id;
 
     console.log('User ID from request:', userId);

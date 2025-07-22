@@ -33,13 +33,13 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${roboto.variable} ${poppins.variable}`}>
       <body className="w-full">
-        <Header />
-        <main className="w-full">
-          <Provider>
+        <Provider>
+          <Header />
+          <main className="w-full">
             {children}
             <Toaster />
-          </Provider>
-        </main>
+          </main>
+        </Provider>
       </body>
     </html>
   );

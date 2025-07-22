@@ -29,8 +29,8 @@
     "src/**/*.ts",
     "packages/**/*.ts",
     "swagger-output.json",
-    "src/swagger.ts"
-    ,"types/*.d.ts"
+    "src/swagger.ts",
+    "types/*.d.ts"
   ],
   "exclude": [
     "out-tsc",

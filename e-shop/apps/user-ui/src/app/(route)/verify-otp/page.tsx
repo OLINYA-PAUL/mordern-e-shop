@@ -8,7 +8,7 @@ import styles from 'apps/user-ui/src/styles/styles';
 import { Eye, EyeOff } from 'lucide-react';
 
 import { useMutation } from '@tanstack/react-query';
-import { axiosBaseUrl } from 'apps/user-ui/src/configs/axios';
+import { axiosInstance } from 'apps/user-ui/src/configs/axios';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
@@ -46,7 +46,7 @@ const VerifyOpt = () => {
 
   const signInMutation = useMutation({
     mutationFn: async (data: formData) => {
-      const res = await axiosBaseUrl.post(`/verify-otp`, data);
+      const res = await axiosInstance.post(`/verify-otp`, data);
       console.log({ resbody: res.data });
 
       const msg = res?.data?.message || 'otp verify successfully!';
