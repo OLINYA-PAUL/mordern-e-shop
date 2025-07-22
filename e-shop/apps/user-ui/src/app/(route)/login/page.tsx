@@ -10,7 +10,7 @@ import styles from 'apps/user-ui/src/styles/styles';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useMutation } from '@tanstack/react-query';
-import { axiosBaseUrl } from 'apps/user-ui/src/configs/axios';
+import { axiosInstance } from 'apps/user-ui/src/configs/axios';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
@@ -48,7 +48,7 @@ const Login = () => {
     mutationFn: async (data: formData) => {
       const datas = { ...data, rememberMe };
 
-      const res = await axiosBaseUrl.post(`/login-user`, datas);
+      const res = await axiosInstance.post(`/login-user`, datas);
       console.log({ resbody: datas }, 'and response', res.data);
 
       const msg = res?.data?.message || 'Sign in successful';

@@ -102,7 +102,7 @@
       }
     },
     "/refress_token": {
-      "get": {
+      "post": {
         "description": "",
         "responses": {
           "201": {
@@ -151,7 +151,7 @@
         }
       }
     },
-    "/get-user": {
+    "/get-auth-user": {
       "get": {
         "description": "",
         "responses": {
@@ -165,8 +165,8 @@
       "get": {
         "description": "",
         "responses": {
-          "200": {
-            "description": "OK"
+          "default": {
+            "description": ""
           }
         }
       }

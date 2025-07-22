@@ -7,7 +7,7 @@ import { ResetNewPassword } from 'apps/user-ui/src/configs/constants/constants';
 import styles from 'apps/user-ui/src/styles/styles';
 import { Eye, EyeOff } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
-import { axiosBaseUrl } from 'apps/user-ui/src/configs/axios';
+import { axiosInstance } from 'apps/user-ui/src/configs/axios';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 
@@ -47,7 +47,7 @@ const ResetPassword = () => {
 
   const signInMutation = useMutation({
     mutationFn: async (data: formData) => {
-      const res = await axiosBaseUrl.post(`/reset-password`, data);
+      const res = await axiosInstance.post(`/reset-password`, data);
       console.log({ resbody: res.data });
 
       const msg = res?.data?.message || 'Password reset successful';

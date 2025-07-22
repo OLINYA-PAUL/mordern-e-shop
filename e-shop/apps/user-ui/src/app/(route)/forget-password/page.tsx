@@ -8,7 +8,7 @@ import { formData } from 'apps/user-ui/src/configs/constants/global.d.types';
 import styles from 'apps/user-ui/src/styles/styles';
 
 import { useMutation } from '@tanstack/react-query';
-import { axiosBaseUrl } from 'apps/user-ui/src/configs/axios';
+import { axiosInstance } from 'apps/user-ui/src/configs/axios';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 import Link from 'next/link';
@@ -40,7 +40,7 @@ const ForgetPassword = () => {
 
   const requestOtp = useMutation({
     mutationFn: async (data: formData) => {
-      const res = await axiosBaseUrl.post(`/request-passwordreset`, data);
+      const res = await axiosInstance.post(`/request-passwordreset`, data);
       console.log({ resbody: res.data });
 
       const msg = res?.data?.message || 'Otp sent to your email';
