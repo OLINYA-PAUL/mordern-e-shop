@@ -1,7 +1,7 @@
 import React from 'react';
 
-const page = () => {
-  return <div className="underline text-xl text-red-700">Hwllo</div>;
+const Page = () => {
+  return <div className="w-full mx-auto">Hwllo</div>;
 };
 
-export default page;
+export default Page;
