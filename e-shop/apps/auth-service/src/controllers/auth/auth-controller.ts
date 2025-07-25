@@ -309,3 +309,48 @@ export const getUser = async (
     next(error);
   }
 };
+
+interface ISellerAuth {
+  name: string;
+  email: string;
+  country: string;
+  phone_number: string;
+  password: string;
+}
+
+export const registerSeller = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { name, email, country, phone_number, password } =
+    req.body as ISellerAuth;
+
+  if (!name || !email || !country || !phone_number || !password) {
+    throw new ValidationError('All fields are required');
+  }
+
+  try {
+    validateRegistrationData(req.body, 'seller');
+
+    const existingSeller = await prisma.sellers.findUnique({
+      where: { email },
+    });
+
+    if (existingSeller) {
+      throw new ValidationError('This email is already registered');
+    }
+
+    await checkOtpRestricTion(email);
+    await trackOtpRequest(email, next);
+    await sendOtp(name, email, 'seller-activation-mail');
+
+    res.status(201).json({
+      success: true,
+      message: 'Otp sent to your email please verify your account',
+    });
+  } catch (error) {
+    console.error('Error in registerSeller:', error);
+    next(error);
+  }
+};

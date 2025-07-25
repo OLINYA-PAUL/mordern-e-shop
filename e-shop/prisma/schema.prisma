@@ -12,17 +12,67 @@ model images {
   file_Id String @unique
   url     String
   userid  String @unique @db.ObjectId
-  user    users  @relation("UserImage", fields: [userid], references: [id])
+  shopId  String @unique @db.ObjectId
+  users   users  @relation("UserImage", fields: [userid], references: [id])
+  shops   Shops  @relation("shopImage", fields: [shopId], references: [id])
 }
 
 model users {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  email     String   @unique
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  email     String        @unique
   password  String?
   name      String?
-  avater    images?  @relation("UserImage")
+  avater    images?       @relation("UserImage")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  imageId   String?       @unique @db.ObjectId
+  following String[]
+  reviews   shopReviews[]
+}
+
+model shopReviews {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  shopId    String   @db.ObjectId
+  userId    String   @db.ObjectId
+  rating    Float    @default(0)
+  comment   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  imageId   String?  @unique @db.ObjectId
-  following String[]
+  user      users    @relation(fields: [userId], references: [id])
+  shop      Shops    @relation(fields: [shopId], references: [id])
+}
+
+model Shops {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  bio           String?
+  categories    String[]
+  avatar        images?       @relation("shopImage")
+  coverBanner   String?
+  address       String?
+  opening_hours String?
+  website       String?
+  ratings       Float         @default(0)
+  social_links  Json[]
+  reviews       shopReviews[]
+  sellerId      String?       @unique @db.ObjectId
+  sellers       sellers?      @relation(fields: [sellerId], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model sellers {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  email        String   @unique
+  password     String?
+  name         String?
+  country      String?
+  phone_number String?
+  stripeId     String?
+  shops        Shops?
+  shopId       String?  @unique @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  imageId      String?  @unique @db.ObjectId
+  imagesId     String?  @db.ObjectId
 }
