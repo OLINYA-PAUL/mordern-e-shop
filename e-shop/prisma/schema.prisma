@@ -8,7 +8,7 @@ datasource db {
 }
 
 model images {
-  id      String @id @default(auto()) @map("_id") @db.ObjectId // ✅ Primary key
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
   file_Id String @unique
   url     String
   userid  String @unique @db.ObjectId
@@ -70,9 +70,8 @@ model sellers {
   phone_number String?
   stripeId     String?
   shops        Shops?
-  shopId       String?  @unique @db.ObjectId
+  shopId       String?  @db.ObjectId
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  imageId      String?  @unique @db.ObjectId
-  imagesId     String?  @db.ObjectId
+  imageId      String?  @db.ObjectId
 }

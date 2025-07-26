@@ -21,7 +21,7 @@ const SignUp = () => {
   const [canResend, setCanResend] = useState(false);
   const [timer, setTimer] = useState(60);
   const [otp, setOtp] = useState<string[]>(['', '', '', '']);
-  const [userData, setUserData] = useState<formData | null>(null);
+  const [sellerData, setSellerData] = useState<formData | null>(null);
   const inputRef = useRef<(HTMLInputElement | null)[]>([]);
   const [showOtp, setShowOtp] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -60,10 +60,10 @@ const SignUp = () => {
 
   const verifyUserOtpMutation = useMutation({
     mutationFn: async () => {
-      if (!userData) return;
+      if (!sellerData) return;
 
-      const res = await axiosInstance.post('/verify-user', {
-        ...userData,
+      const res = await axiosInstance.post('/verify-seller', {
+        ...sellerData,
         otp: otp.join('').trim(),
       });
 
@@ -72,8 +72,11 @@ const SignUp = () => {
 
       return res.data;
     },
-    onSuccess: () => {
-      router.push('/login');
+    onSuccess: (data) => {
+      console.log({ 'seler data available ===>': data });
+      setSellerData(data.seller?.id);
+      setActiveStep(2);
+      setShowOtp(false);
     },
     onError: (err: any) => {
       console.log({ 'otp err': err });
@@ -116,7 +119,7 @@ const SignUp = () => {
 
   const signUpMutation = useMutation({
     mutationFn: async (data: formData) => {
-      const res = await axiosInstance.post(`/user-registration`, data);
+      const res = await axiosInstance.post(`/seller-registration`, data);
       console.log({ resbody: res.data });
 
       const msg = res?.data?.message || 'OTP sent to your email';
@@ -124,7 +127,7 @@ const SignUp = () => {
       return res.data;
     },
     onSuccess: (_, formData) => {
-      setUserData(formData);
+      setSellerData(formData);
       setTimer(60);
       setShowOtp(true);
       setCanResend(false);
