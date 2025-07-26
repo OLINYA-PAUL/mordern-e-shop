@@ -9,6 +9,9 @@ import {
   logOutUser,
   refressUserToken,
   getUser,
+  registerSeller,
+  verifySellerOtp,
+  createSellerShop,
 } from '../controllers/auth/auth-controller';
 import { isAuthenticated } from '../../../../packages/middleware/isAuthenticated';
 
@@ -24,5 +27,11 @@ authrouter.post('/reset-password', resetUserPassword);
 authrouter.post('/logout-user', logOutUser);
 authrouter.get('/get-auth-user', isAuthenticated, getUser);
 authrouter.get('/auth-user', isAuthenticated);
+
+// seller registration
+
+authrouter.post('/seller-registration', registerSeller);
+authrouter.post('/verify-seller', verifySellerOtp);
+authrouter.post('/create-shop', createSellerShop);
 
 export default authrouter;

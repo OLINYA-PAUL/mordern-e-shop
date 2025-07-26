@@ -35,15 +35,14 @@ export const validateRegistrationData = (
   data: any,
   userType: 'user' | 'seller' = 'user'
 ) => {
-  const { name, email, password, avater, phone_number, address, country } =
-    data;
+  const { name, email, password, phone_number, country } = data;
 
   if (!name || !email || !password) {
     throw new ValidationError('Name, email and password are required');
   }
 
   if (userType === 'seller') {
-    if (!phone_number || !address || !country || !avater) {
+    if (!phone_number || !country) {
       throw new ValidationError('All seller fields are required');
     }
   }
@@ -160,8 +159,9 @@ export const handleForgetPassword = async (
 
     try {
       const user =
-        userType === 'user' &&
-        (await prisma.users.findUnique({ where: { email } }));
+        userType === 'user'
+          ? await prisma.users.findUnique({ where: { email } })
+          : await prisma.sellers.findUnique({ where: { email } });
 
       if (!user) {
         throw new ValidationError('User not found');
@@ -172,7 +172,11 @@ export const handleForgetPassword = async (
       await sendOtp(
         user.name!,
         email,
-        `${userType === 'user' && 'forget-password-otp-reset'}`
+        `${
+          userType === 'user'
+            ? 'forget-password-otp-reset'
+            : 'forget-seller-reset-password'
+        }`
       );
 
       res.status(200).json({

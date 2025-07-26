@@ -354,3 +354,115 @@ export const registerSeller = async (
     next(error);
   }
 };
+
+//verify seller otp
+
+interface IOtpVerification {
+  otp: string;
+  email: string;
+  name: string;
+  password?: string;
+  phone_number?: string;
+  country?: string;
+}
+
+export const verifySellerOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { otp, email, password, name, phone_number, country } =
+      req.body as IOtpVerification;
+
+    if (!email || !name || !password || !otp || !phone_number || !country) {
+      throw new ValidationError('all fields are required for verification');
+    }
+
+    const userExist = await prisma.sellers.findUnique({
+      where: { email: email },
+    });
+
+    if (userExist) {
+      throw new ValidationError('This email is already registered');
+    }
+
+    await verifyOtp(email, otp);
+
+    const hashPassword = await bcrypt.hash(password, 10);
+    const seller = await prisma.sellers.create({
+      data: { email, name, password: hashPassword, country, phone_number },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Seller registered successfully',
+      seller,
+    });
+  } catch (error) {
+    console.log('Error in verifyUserOtp:', error);
+    next(error);
+  }
+};
+
+// create a shop for seller
+
+interface ISeller {
+  name: string;
+  bio: string;
+  address: string;
+  opening_hours: string;
+  website: string;
+  categories: string[];
+  sellerId: string;
+}
+
+export const createSellerShop = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { name, bio, address, opening_hours, website, categories, sellerId } =
+      req.body as ISeller;
+
+    const data = {
+      name,
+      bio,
+      address,
+      opening_hours,
+      website,
+      categories,
+      sellerId,
+    } as ISeller;
+
+    if (
+      !name ||
+      !bio ||
+      !address ||
+      !opening_hours ||
+      !website ||
+      !categories ||
+      !sellerId
+    ) {
+      throw new ValidationError('All fields are required');
+    }
+
+    if (!website.trim().startsWith('https')) {
+      throw new ValidationError('Invalid website URL');
+    }
+
+    const seller = await prisma.shops.create({
+      data: data,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Shop created successfully',
+      seller,
+    });
+  } catch (error) {
+    console.error('Error in createSellerShop:', error);
+    next(error);
+  }
+};
