@@ -2,6 +2,11 @@ import { NextFunction, Response, Request } from 'express';
 import { ValidationError } from '@packages/error-handler/appError';
 // import { ValidationError } from "../../../../../packages/error-handler/appError";
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+  apiVersion: '2025-06-30.basil',
+});
 
 import {
   validateRegistrationData,
@@ -466,6 +471,102 @@ export const createSellerShop = async (
     });
   } catch (error) {
     console.error('Error in createSellerShop:', error);
+    next(error);
+  }
+};
+
+export const connectStripe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { sellerId } = req.body as { sellerId: string };
+
+    if (!sellerId) {
+      throw new ValidationError('Seller ID is required');
+    }
+
+    const seller = await prisma.sellers.findUnique({
+      where: { id: sellerId },
+    });
+
+    if (!seller) {
+      throw new ValidationError('Seller not found');
+    }
+
+    const account = await stripe.accounts.create({
+      type: 'express',
+      country: 'US', // Adjust as necessary
+      email: seller.email,
+      capabilities: {
+        card_payments: { requested: true },
+        transfers: { requested: true },
+      },
+    });
+
+    await prisma.sellers.update({
+      where: { id: sellerId },
+      data: { stripeId: account.id },
+    });
+
+    const accountLink = await stripe.accountLinks.create({
+      account: account.id,
+      refresh_url: 'http://localhost:3000/success',
+      return_url: 'http://localhost:3000/success',
+      type: 'account_onboarding',
+    });
+
+    res.status(200).json({
+      success: true,
+      url: accountLink.url,
+      message: 'Stripe account created successfully',
+    });
+  } catch (error) {
+    console.error('Error in stripe:', error);
+    next(error);
+  }
+};
+
+export const loginSeller = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { email, password, rememberMe = false } = req.body as IAuth;
+
+    if (!email || !password) {
+      throw new ValidationError('Email and password are required');
+    }
+
+    const seller = await prisma.sellers.findUnique({
+      where: { email },
+    });
+
+    if (!seller) {
+      throw new ValidationError('User not found');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, seller.password!);
+    if (!isPasswordValid) {
+      throw new ValidationError('Invalid password');
+    }
+
+    // Here you would typically generate a JWT token and send it back
+    const access_token = accessToken({ id: seller.id, role: 'seller' });
+    const refress_token = refressToken({ id: seller.id, role: 'seller' });
+
+    setCookies(res, 'access_token', access_token, rememberMe);
+    setCookies(res, 'refress_token', refress_token, rememberMe);
+
+    res.status(200).json({
+      success: true,
+      message: 'Login successful',
+      seller: { id: seller.id, email: seller.email, name: seller.name },
+    });
+  } catch (error) {
+    console.error('Error in userLogin:', error);
     next(error);
   }
 };
