@@ -15,6 +15,7 @@ import { AxiosError } from 'axios';
 import styles from 'apps/seller-ui/src/styles/styles';
 // import countries from "../../../utils/countries/countries"
 import { countries } from 'apps/seller-ui/src/utils/countries/countries';
+import CreateShop from 'apps/seller-ui/src/shared/modules/auth/create-shop/page';
 
 const SignUp = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -26,6 +27,7 @@ const SignUp = () => {
   const [showOtp, setShowOtp] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
+  const [sellerId, setSellerId] = useState<string | null>(null);
 
   const router = useRouter();
 
@@ -74,7 +76,14 @@ const SignUp = () => {
     },
     onSuccess: (data) => {
       console.log({ 'seler data available ===>': data });
-      setSellerData(data.seller?.id);
+      setSellerId((prev) => {
+        console.log('prev sellerId:', prev);
+        if (prev !== data.seller?.id) {
+          return data.seller?.id;
+        }
+
+        return prev;
+      });
       setActiveStep(2);
       setShowOtp(false);
     },
@@ -147,6 +156,27 @@ const SignUp = () => {
   useEffect(() => {
     if (!showOtp) setOtp(['', '', '', '']);
   }, [showOtp]);
+
+  const handleConnectStripe = async () => {
+    try {
+      const res = await axiosInstance.post('/connect-stripe', { sellerId });
+      if (res.data.url) {
+        window.location.href = res.data.url;
+      }
+    } catch (error) {
+      console.error('Error connecting to Stripe:', error);
+    }
+  };
+  const handleConnectPaystack = async () => {
+    try {
+      const res = await axiosInstance.post('/connect-paystack', { sellerId });
+      if (res.data.url) {
+        window.location.href = res.data.url;
+      }
+    } catch (error) {
+      console.error('Error connecting to Stripe:', error);
+    }
+  };
 
   return (
     <div className=" w-full flex flex-col items-center min-h-screen mt-3 ">
@@ -422,6 +452,38 @@ const SignUp = () => {
                 )}
               </div> */}
               </div>
+            </div>
+          </div>
+        )}
+        {activeStep === 2 && (
+          <div className="w-full">
+            <CreateShop sellerId={sellerId} setActiveStep={setActiveStep} />
+          </div>
+        )}
+
+        {activeStep === 3 && (
+          <div className="w-full flex items-center justify-center flex-col">
+            <div className="w-full sm:w-[90%] md:w-[60%] lg:w-[40%] xl:w-[25%] shadow-sm bg-white p-4 sm:p-5 rounded-md">
+              <h1 className="text-[20px] font-extrabold font-poppins text-center text-black mb-2">
+                Withdraw Method
+              </h1>
+              <h3 className="text-xs  font-poppins text-center text-slate-400 mb-2">
+                Withdraw with stripe or bank paystack
+              </h3>
+              <button
+                type="submit"
+                className={` w-full bg-black text-white py-2 px-3 mt-2 rounded-md font-medium text-xs transition-colors`}
+                onClick={handleConnectStripe}
+              >
+                connect stripe
+              </button>
+              <button
+                type="submit"
+                className={` w-full bg-blue-950 text-white py-2 px-3 mt-2 rounded-md font-medium text-xs transition-colors`}
+                onClick={handleConnectPaystack}
+              >
+                connect paystack
+              </button>
             </div>
           </div>
         )}
