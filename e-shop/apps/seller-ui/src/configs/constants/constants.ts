@@ -59,3 +59,14 @@ export const ResetNewPassword = yup
     newpassword: yup.string().required(),
   })
   .required();
+
+export const createShopSchema = yup
+  .object({
+    name: yup.string().required(),
+    address: yup.string().required(),
+    bio: yup.string().required(),
+    opening_hours: yup.string().required(),
+    website: yup.string().required(),
+    categories: yup.string().required(),
+  })
+  .required();

@@ -405,8 +405,6 @@ export const verifySellerOtp = async (
   }
 };
 
-// create a shop for seller
-
 interface ISeller {
   name: string;
   bio: string;
@@ -426,15 +424,20 @@ export const createSellerShop = async (
     const { name, bio, address, opening_hours, website, categories, sellerId } =
       req.body as ISeller;
 
+    // Ensure categories is an array
+    const categoriesArray = Array.isArray(categories)
+      ? categories
+      : [categories];
+
     const data = {
       name,
       bio,
       address,
       opening_hours,
       website,
-      categories,
+      categories: categoriesArray,
       sellerId,
-    } as ISeller;
+    };
 
     if (
       !name ||
