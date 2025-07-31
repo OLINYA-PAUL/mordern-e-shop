@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginSchema } from 'apps/user-ui/src/configs/constants/constants';
-import { formData } from 'apps/user-ui/src/configs/constants/global.d.types';
-// import SVGComponent from 'apps/user-ui/src/shared/components';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useMutation } from '@tanstack/react-query';
@@ -20,6 +18,10 @@ const Login = () => {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const router = useRouter();
+  interface formData {
+    password: string;
+    email: string;
+  }
 
   const {
     register,
@@ -37,18 +39,14 @@ const Login = () => {
     signInMutation.mutate(data);
   };
 
-  const inputs = watch(['email', 'password']); // returns current values
-  const dataEmpty = inputs.some((v) => !v);
-
-  // const dataEmpty = Object.values(FormData).some(
-  //   (items) => items === '' || !items
-  // );
+  const inputs = watch(); // returns current values
+  const dataEmpty = inputs.email === '' || inputs.password === '';
 
   const signInMutation = useMutation({
     mutationFn: async (data: formData) => {
       const datas = { ...data, rememberMe };
 
-      const res = await axiosInstance.post(`/login-user`, datas);
+      const res = await axiosInstance.post(`/login-seller`, datas);
       console.log({ resbody: datas }, 'and response', res.data);
 
       const msg = res?.data?.message || 'Sign in successful';

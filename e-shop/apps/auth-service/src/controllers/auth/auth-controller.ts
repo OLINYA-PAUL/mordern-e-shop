@@ -512,8 +512,8 @@ export const connectStripe = async (
 
     const accountLink = await stripe.accountLinks.create({
       account: account.id,
-      refresh_url: 'http://localhost:3000/success',
-      return_url: 'http://localhost:3000/success',
+      refresh_url: 'http://localhost:4200/success',
+      return_url: 'http://localhost:4200/success',
       type: 'account_onboarding',
     });
 
@@ -524,6 +524,53 @@ export const connectStripe = async (
     });
   } catch (error) {
     console.error('Error in stripe:', error);
+    next(error);
+  }
+};
+
+export const refressSellerToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const refreshToken = req.cookies.seller_refress_token.toString();
+
+    if (!refreshToken) {
+      throw new ValidationError('Unauthorized! No refresh token');
+    }
+    // const rawToken = refreshToken.replace(/^"|"$/g, '');
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.REFRESS_TOKEN_SECRET as string
+    ) as { id: string; role: string } | JwtPayload;
+
+    if (!decoded || !decoded.id || !decoded.role) {
+      throw new JsonWebTokenError('Forbidden! Invalid refresh token');
+    }
+
+    // Fetch user from database
+    const user = await prisma.users.findUnique({
+      where: { id: decoded.id },
+    });
+
+    if (!user) {
+      throw new ValidationError('User not found');
+    }
+
+    // Create new access token
+    const newAccessToken = jwt.sign(
+      { id: decoded.id, role: decoded.role },
+      process.env.ACCESS_TOKEN_SECRET as string,
+      { expiresIn: '15m' }
+    );
+
+    // Set new access token cookie
+    setCookies(res, 'seller_access_token', newAccessToken, true);
+
+    res.status(201).json({ message: 'Access token refreshed' });
+  } catch (error) {
+    console.error('Error refreshing user token:', error);
     next(error);
   }
 };
@@ -557,8 +604,8 @@ export const loginSeller = async (
     const access_token = accessToken({ id: seller.id, role: 'seller' });
     const refress_token = refressToken({ id: seller.id, role: 'seller' });
 
-    setCookies(res, 'access_token', access_token, rememberMe);
-    setCookies(res, 'refress_token', refress_token, rememberMe);
+    setCookies(res, 'seller_access_token', access_token, rememberMe);
+    setCookies(res, 'seller_refress_token', refress_token, rememberMe);
 
     res.status(200).json({
       success: true,
@@ -567,6 +614,39 @@ export const loginSeller = async (
     });
   } catch (error) {
     console.error('Error in userLogin:', error);
+    next(error);
+  }
+};
+
+export const getSeller = async (
+  req: Request,
+
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+
+    console.log('User ID from request:', userId);
+
+    if (!userId) {
+      throw new ValidationError('User ID not found in request');
+    }
+
+    const seller = await prisma.sellers.findUnique({
+      where: { id: userId },
+    });
+
+    if (!seller) {
+      throw new ValidationError('User not found');
+    }
+
+    res.status(200).json({
+      success: true,
+      seller,
+    });
+  } catch (error) {
+    console.error('Error fetching user:', error);
     next(error);
   }
 };

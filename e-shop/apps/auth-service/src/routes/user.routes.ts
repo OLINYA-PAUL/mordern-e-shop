@@ -12,6 +12,9 @@ import {
   registerSeller,
   verifySellerOtp,
   createSellerShop,
+  connectStripe,
+  loginSeller,
+  getSeller,
 } from '../controllers/auth/auth-controller';
 import { isAuthenticated } from '../../../../packages/middleware/isAuthenticated';
 
@@ -33,5 +36,8 @@ authrouter.get('/auth-user', isAuthenticated);
 authrouter.post('/seller-registration', registerSeller);
 authrouter.post('/verify-seller', verifySellerOtp);
 authrouter.post('/create-shop', createSellerShop);
+authrouter.post('/create-payment-method', connectStripe);
+authrouter.post('/login-seller', loginSeller);
+authrouter.get('/get-seller', isAuthenticated, getSeller);
 
 export default authrouter;
