@@ -5,7 +5,8 @@ import Express from 'express';
 declare global {
   namespace Express {
     interface Request {
-      user?: string | JwtPayload | User;
+      user: string | JwtPayload | User;
+      role: 'user' | 'seller';
     }
   }
 }

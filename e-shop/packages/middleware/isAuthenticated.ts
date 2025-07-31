@@ -7,7 +7,7 @@ export const isAuthenticated = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.cookies.access_token;
+  const token = req.cookies.access_token || req.cookies.seller_access_token;
 
   console.log('Token: ===>', token);
 
@@ -30,20 +30,43 @@ export const isAuthenticated = async (
 
     console.log('Decoded Token: ===>', decoded);
 
-    const user = await prisma.users.findUnique({
-      where: { id: decoded.id },
-    });
+    const { id, role } = decoded;
+
+    if (!id || !role) {
+      return next(new Error('Forbidden: Invalid token payload'));
+    }
+
+    let user;
+
+    if (role === 'user') {
+      user = await prisma.users.findUnique({
+        where: { id: decoded.id },
+      });
+    }
+    if (role === 'seller') {
+      user = await prisma.sellers.findUnique({
+        where: { id: decoded.id },
+        include: { shops: true },
+      });
+    }
 
     if (!user) {
       return next(new Error('Forbidden: Account not found'));
     }
-    if (user.id !== decoded.id) {
-      return next(new Error('Forbidden: Role mismatch'));
-    }
-    //@ts-ignore
+
     req.user = user;
+    req.role = role;
     next();
   } catch (err: any) {
     return next(new Error('Authentication failed: ' + err.message));
   }
+};
+
+export const authorizeRoles = (...allowedRoles: ('user' | 'seller')[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!allowedRoles.includes(req.role as any)) {
+      return next(new Error('Forbidden: Access denied'));
+    }
+    next();
+  };
 };
