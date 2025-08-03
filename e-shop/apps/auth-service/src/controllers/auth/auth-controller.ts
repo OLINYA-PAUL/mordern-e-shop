@@ -4,10 +4,15 @@ import { ValidationError } from '@packages/error-handler/appError';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: '2025-06-30.basil',
-});
+let stripe: any;
 
+if (process.env.STRIPE_SECRET_KEY!) {
+  stripe = new Stripe(process.env.STRIPE_SECRET_KEY! as string, {
+    apiVersion: '2025-06-30.basil',
+  });
+  console.log({ 'env stripe details': process.env.STRIPE_SECRET_KEY! });
+  console.log({ stripeDetails: stripe });
+}
 import {
   validateRegistrationData,
   checkOtpRestricTion,
@@ -482,6 +487,8 @@ export const connectStripe = async (
 ) => {
   try {
     const { sellerId } = req.body as { sellerId: string };
+
+    console.log({ 'sellerid ===+>': sellerId });
 
     if (!sellerId) {
       throw new ValidationError('Seller ID is required');
