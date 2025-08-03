@@ -14,6 +14,7 @@ import {
   createSellerShop,
   connectStripe,
   loginSeller,
+  createPayStackSubAccount,
   getSeller,
 } from '../controllers/auth/auth-controller';
 import {
@@ -40,6 +41,7 @@ authrouter.post('/seller-registration', registerSeller);
 authrouter.post('/verify-seller', verifySellerOtp);
 authrouter.post('/create-shop', createSellerShop);
 authrouter.post('/create-payment-method', connectStripe);
+authrouter.post('/create-paystack-payment-method', createPayStackSubAccount);
 authrouter.post('/login-seller', loginSeller);
 authrouter.get(
   '/get-seller',
@@ -49,3 +51,5 @@ authrouter.get(
 );
 
 export default authrouter;
+
+;

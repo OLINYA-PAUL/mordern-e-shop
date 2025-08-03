@@ -93,7 +93,7 @@ const PaystackBankModal = ({
           <div className="w-full mb-2">
             <input
               type="text"
-              className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px]`}
+              className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px] text-black`}
               placeholder="bank_name"
               {...register('bank_name')}
             />
@@ -106,7 +106,7 @@ const PaystackBankModal = ({
           <div className="w-full mb-2">
             <input
               type="text"
-              className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px]`}
+              className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px] text-black`}
               placeholder="bank_code"
               {...register('bank_code')}
             />
@@ -119,7 +119,7 @@ const PaystackBankModal = ({
           <div className="w-full mb-2">
             <input
               type="text"
-              className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px]`}
+              className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px] text-black`}
               placeholder="account_number"
               {...register('account_number')}
             />
