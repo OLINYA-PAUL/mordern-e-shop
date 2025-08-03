@@ -3,7 +3,10 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { SingUpSchema } from 'apps/user-ui/src/configs/constants/constants';
+import {
+  SingUpSchema,
+  payStackInfo,
+} from 'apps/user-ui/src/configs/constants/constants';
 import { formData } from 'apps/user-ui/src/configs/constants/global.d.types';
 // import SVGComponent from 'apps/user-ui/src/shared/components';
 import { Eye, EyeOff } from 'lucide-react';
@@ -17,6 +20,133 @@ import styles from 'apps/seller-ui/src/styles/styles';
 import { countries } from 'apps/seller-ui/src/utils/countries/countries';
 import CreateShop from 'apps/seller-ui/src/shared/modules/auth/create-shop/page';
 
+const PaystackBankModal = ({
+  handleChange,
+  handleSubmitPayStackInfo,
+  setPayStackModel,
+  payStackInfo,
+  form,
+}: {
+  handleChange: any;
+  handleSubmitPayStackInfo: any;
+  setPayStackModel: any;
+  form: any;
+  payStackInfo: any;
+}) => {
+  interface payStackData {
+    bank_name: string;
+    bank_code: string;
+    account_number: string;
+  }
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<payStackData>({
+    resolver: yupResolver(payStackInfo),
+  } as any);
+
+  const watchedValues = watch();
+
+  // Fixed dataEmpty logic
+  const dataEmpty =
+    !watchedValues.bank_name ||
+    !watchedValues.bank_code ||
+    !watchedValues.account_number;
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center"
+      id="closeModel"
+      onClick={(e: any) => {
+        if (e.target.id === 'closeModel') {
+          e.stopPropagation();
+          setPayStackModel(false);
+        }
+      }}
+    >
+      <div className="w-full max-w-md mx-auto bg-[#fcfcf3] rounded-md shadow-lg p-6 relative">
+        {/* Close Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent event bubbling
+            setPayStackModel(false);
+          }}
+          className="absolute top-2 right-2 text-xl text-gray-600 hover:text-black"
+        >
+          &times;
+        </button>
+
+        <h2 className="text-xl font-semibold text-center text-black mb-2">
+          Please Enter Your Bank Details
+        </h2>
+        <p className="text-sm text-center text-[#00000099] mb-4">
+          We are happy to have you creating a shop!
+        </p>
+
+        <form
+          onSubmit={handleSubmit(handleSubmitPayStackInfo)}
+          className="space-y-3"
+        >
+          <div className="w-full mb-2">
+            <input
+              type="text"
+              className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px]`}
+              placeholder="bank_name"
+              {...register('bank_name')}
+            />
+            {errors.bank_name && (
+              <p className="text-[11px] font-poppins text-red-500 mt-1">
+                {String(errors.bank_name.message)}
+              </p>
+            )}
+          </div>
+          <div className="w-full mb-2">
+            <input
+              type="text"
+              className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px]`}
+              placeholder="bank_code"
+              {...register('bank_code')}
+            />
+            {errors.bank_code && (
+              <p className="text-[11px] font-poppins text-red-500 mt-1">
+                {String(errors.bank_code.message)}
+              </p>
+            )}
+          </div>
+          <div className="w-full mb-2">
+            <input
+              type="text"
+              className={`${styles.input} !bg-[#f3f3ec] !rounded-md text-xs px-3 py-[6px]`}
+              placeholder="account_number"
+              {...register('account_number')}
+            />
+            {errors.account_number && (
+              <p className="text-[11px] font-poppins text-red-500 mt-1">
+                {String(errors.account_number.message)}
+              </p>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className={`${
+              payStackInfo.isPending ||
+              (dataEmpty && 'cursor-not-allowed bg-slate-400')
+            } w-full bg-black text-white py-2 px-3 mt-2 rounded-md font-medium text-xs transition-colors`}
+            disabled={payStackInfo.isPending || dataEmpty}
+          >
+            {payStackInfo.isPending ? 'Please wait...' : 'Submit details'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const SignUp = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [canResend, setCanResend] = useState(false);
@@ -28,8 +158,51 @@ const SignUp = () => {
   const [serverError, setServerError] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(1);
   const [sellerId, setSellerId] = useState<string | null>(null);
+  const [paystackModel, setPayStackModel] = useState<boolean>(false);
 
-  const router = useRouter();
+  interface PayStackData {
+    name: string;
+    password: string;
+    email: string;
+    phone_number: number;
+    rememberMe: boolean;
+    country: string;
+  }
+  const payStackInfo = useMutation({
+    mutationFn: async (data: PayStackData) => {
+      const res = await axiosInstance.post(`/seller-registration`, data);
+      console.log({ resbody: res.data });
+
+      const msg = res?.data?.message || 'OTP sent to your email';
+      toast.success(msg);
+      return res.data;
+    },
+    onSuccess: (_, formData) => {},
+    onError: (err: any) => {
+      console.log('user error', err);
+      if (err instanceof AxiosError) {
+        const msg = err?.response?.data?.error || 'Failed to create account';
+        setServerError(msg);
+        toast.error(msg);
+      }
+    },
+  });
+
+  const [form, setForm] = useState({
+    bank_name: '',
+    bank_code: '',
+    account_number: '',
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmitPayStackInfo = (data: any, e: React.FormEvent) => {
+    e.preventDefault();
+    payStackInfo.mutate(data);
+  };
 
   const {
     register,
@@ -159,7 +332,11 @@ const SignUp = () => {
 
   const handleConnectStripe = async () => {
     try {
-      const res = await axiosInstance.post('/connect-stripe', { sellerId });
+      const res = await axiosInstance.post('/create-payment-method', {
+        sellerId,
+      });
+
+      console.log({ stripeUrl: res.data.url });
       if (res.data.url) {
         window.location.href = res.data.url;
       }
@@ -169,7 +346,9 @@ const SignUp = () => {
   };
   const handleConnectPaystack = async () => {
     try {
-      const res = await axiosInstance.post('/connect-paystack', { sellerId });
+      const res = await axiosInstance.post('/create-payment-method', {
+        sellerId,
+      });
       if (res.data.url) {
         window.location.href = res.data.url;
       }
@@ -179,7 +358,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className=" w-full flex flex-col items-center min-h-screen mt-3 ">
+    <div className=" w-full flex flex-col items-center min-h-screen mt-3 relative">
       <div className="relative w-full max-w-md md:max-w-xl mx-auto flex items-center justify-between mb-6 px-4">
         {/* Progress Line */}
         <div className="absolute top-[16px] left-4 right-4 h-1 bg-slate-400 -z-10 rounded-md w-full md:w-[90%] max-sm:mx-[30px]" />
@@ -477,13 +656,22 @@ const SignUp = () => {
               >
                 connect stripe
               </button>
-              <button
-                type="submit"
-                className={` w-full bg-blue-950 text-white py-2 px-3 mt-2 rounded-md font-medium text-xs transition-colors`}
-                onClick={handleConnectPaystack}
+              <div
+                className={` w-full text-center cursor-pointer bg-blue-950 text-white py-2 px-3 mt-2 rounded-md font-medium text-xs transition-colors`}
+                onClick={() => setPayStackModel(true)}
               >
-                connect paystack
-              </button>
+                {paystackModel ? (
+                  <PaystackBankModal
+                    handleChange={handleChange}
+                    handleSubmitPayStackInfo={handleSubmitPayStackInfo}
+                    payStackInfo={payStackInfo}
+                    form={form}
+                    setPayStackModel={setPayStackModel}
+                  />
+                ) : (
+                  'Connect Paystack'
+                )}
+              </div>
             </div>
           </div>
         )}

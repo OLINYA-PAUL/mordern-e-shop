@@ -16,7 +16,10 @@ import {
   loginSeller,
   getSeller,
 } from '../controllers/auth/auth-controller';
-import { isAuthenticated } from '../../../../packages/middleware/isAuthenticated';
+import {
+  isAuthenticated,
+  authorizeRoles,
+} from '../../../../packages/middleware/isAuthenticated';
 
 const authrouter: Router = express.Router();
 
@@ -38,6 +41,11 @@ authrouter.post('/verify-seller', verifySellerOtp);
 authrouter.post('/create-shop', createSellerShop);
 authrouter.post('/create-payment-method', connectStripe);
 authrouter.post('/login-seller', loginSeller);
-authrouter.get('/get-seller', isAuthenticated, getSeller);
+authrouter.get(
+  '/get-seller',
+  isAuthenticated,
+  authorizeRoles('seller'),
+  getSeller
+);
 
 export default authrouter;
