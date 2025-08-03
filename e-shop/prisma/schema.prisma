@@ -62,16 +62,17 @@ model Shops {
 }
 
 model sellers {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  email        String   @unique
-  password     String?
-  name         String?
-  country      String?
-  phone_number String?
-  stripeId     String?
-  shops        Shops?
-  shopId       String?  @db.ObjectId
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  imageId      String?  @db.ObjectId
+  id                     String   @id @default(auto()) @map("_id") @db.ObjectId
+  email                  String   @unique
+  password               String?
+  name                   String?
+  country                String?
+  phone_number           String?
+  stripeId               String?
+  shops                  Shops?
+  shopId                 String?  @db.ObjectId
+  paystackSubaccountCode String?
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  imageId                String?  @db.ObjectId
 }

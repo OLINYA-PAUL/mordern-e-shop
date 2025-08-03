@@ -3,6 +3,7 @@ import { ValidationError } from '@packages/error-handler/appError';
 // import { ValidationError } from "../../../../../packages/error-handler/appError";
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import Stripe from 'stripe';
+import axios from 'axios';
 
 let stripe: any;
 
@@ -655,5 +656,73 @@ export const getSeller = async (
   } catch (error) {
     console.error('Error fetching user:', error);
     next(error);
+  }
+};
+
+export const createPayStackSubAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { sellerId, bankCode, accountNumber, bank_name } = req.body as {
+      sellerId: string;
+      bankCode: string; // Seller's bank code (e.g., '058' for Access Bank)
+      accountNumber: string; // Seller's bank account number
+      bank_name: string;
+    };
+
+    if (!sellerId || !bankCode || !accountNumber || !bank_name) {
+      throw new ValidationError(
+        'sellerId, bankCode, bankname and accountNumber are required'
+      );
+    }
+
+    // Find the seller from your database
+    const seller = await prisma.sellers.findUnique({
+      where: { id: sellerId },
+    });
+
+    if (!seller) {
+      throw new ValidationError('Seller not found');
+    }
+
+    // Create Paystack subaccount (equivalent to Stripe connect account creation)
+    const response = await axios.post(
+      'https://api.paystack.co/subaccount',
+      {
+        business_name: bank_name,
+        settlement_bank: bankCode, // Bank code
+        account_number: accountNumber, // Account number
+        percentage_charge: 10.0, // Platform fee %, adjust as needed
+        description: `Subaccount for seller ${seller.name}`,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY!}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const subaccountCode = response.data.data.subaccount_code;
+
+    // Save the Paystack subaccount code to your DB
+    await prisma.sellers.update({
+      where: { id: sellerId },
+      data: { paystackSubaccountCode: subaccountCode },
+    });
+
+    // Respond with subaccount info
+    res.status(200).json({
+      success: true,
+      subaccountCode,
+      message: 'Paystack subaccount created successfully',
+    });
+  } catch (error: any) {
+    console.error('Paystack error:', error.response?.data || error.message);
+    res.status(500).json({
+      message: error.response?.data?.message || 'Paystack error',
+    });
   }
 };
