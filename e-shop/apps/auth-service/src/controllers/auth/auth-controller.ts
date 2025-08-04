@@ -665,14 +665,14 @@ export const createPayStackSubAccount = async (
   next: NextFunction
 ) => {
   try {
-    const { sellerId, bankCode, accountNumber, bank_name } = req.body as {
+    const { sellerId, bank_code, account_number, bank_name } = req.body as {
       sellerId: string;
-      bankCode: string; // Seller's bank code (e.g., '058' for Access Bank)
-      accountNumber: string; // Seller's bank account number
+      bank_code: string; // Seller's bank code (e.g., '058' for Access Bank)
+      account_number: string; // Seller's bank account number
       bank_name: string;
     };
 
-    if (!sellerId || !bankCode || !accountNumber || !bank_name) {
+    if (!sellerId || !bank_code || !account_number || !bank_name) {
       throw new ValidationError(
         'sellerId, bankCode, bankname and accountNumber are required'
       );
@@ -692,8 +692,8 @@ export const createPayStackSubAccount = async (
       'https://api.paystack.co/subaccount',
       {
         business_name: bank_name,
-        settlement_bank: bankCode, // Bank code
-        account_number: accountNumber, // Account number
+        settlement_bank: bank_code, // Bank code
+        account_number: account_number, // Account number
         percentage_charge: 10.0, // Platform fee %, adjust as needed
         description: `Subaccount for seller ${seller.name}`,
       },

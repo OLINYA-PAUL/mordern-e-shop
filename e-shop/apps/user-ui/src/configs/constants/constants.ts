@@ -61,7 +61,7 @@ export const ResetNewPassword = yup
   .required();
 
 
-export const payStackInfo = yup
+export const payStackSchema= yup
   .object({
     bank_name: yup.string().required(),
     bank_code: yup.string().required(),
