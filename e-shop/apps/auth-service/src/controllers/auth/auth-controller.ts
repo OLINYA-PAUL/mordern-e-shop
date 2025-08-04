@@ -726,3 +726,115 @@ export const createPayStackSubAccount = async (
     });
   }
 };
+
+export const initiateTransactionWithSplit = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { email, amount, cartItems } = req.body as {
+      email: string;
+      amount: number | string;
+      cartItems: any[];
+    };
+
+    if (!email || !amount || !cartItems || !cartItems) {
+      throw new ValidationError('Missing email, amount, or cartItems');
+    }
+
+    // STEP 1: Calculate split per seller
+    const totalAmount = cartItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    );
+
+    // Example structure of cartItems: [{ sellerId, price, quantity }]
+    const sellerTotals: Record<string, number> = {};
+
+    for (const item of cartItems) {
+      const itemTotal = item.price * item.quantity;
+      if (!sellerTotals[item.sellerId]) {
+        sellerTotals[item.sellerId] = 0;
+      }
+      sellerTotals[item.sellerId] += itemTotal;
+    }
+
+    // Fetch seller subaccounts from DB
+    const sellers = await prisma.sellers.findMany({
+      where: {
+        id: { in: Object.keys(sellerTotals) },
+        paystackSubaccountCode: { not: null },
+      },
+      select: {
+        id: true,
+        paystackSubaccountCode: true,
+      },
+    });
+
+    const splitReceivers = sellers.map((seller) => {
+      const sellerAmount = sellerTotals[seller.id];
+      const share = ((sellerAmount / totalAmount) * 100).toFixed(2);
+
+      return {
+        subaccount: seller.paystackSubaccountCode,
+        share: Number(share), // Paystack expects numbers, not strings
+      };
+    });
+
+    // Add platform share if needed
+    const platformPercentage = 5; // e.g., 5% for your platform
+    splitReceivers.push({
+      subaccount: process.env.PLATFORM_SUBACCOUNT_CODE!,
+      share: platformPercentage,
+    });
+
+    const totalShare = splitReceivers.reduce((sum, rec) => sum + rec.share, 0);
+    const adjustedReceivers = splitReceivers.map((rec) => ({
+      ...rec,
+      share: (rec.share / totalShare) * 100, // Normalize to 100%
+    }));
+
+    // STEP 2: Create Split on Paystack (optional if using existing one-time)
+    const splitResponse = await axios.post(
+      'https://api.paystack.co/split',
+      {
+        name: `Order Split - ${Date.now()}`,
+        type: 'percentage',
+        currency: 'NGN',
+        subaccounts: adjustedReceivers,
+        bearer_type: 'account',
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        },
+      }
+    );
+
+    const splitCode = splitResponse.data.data.split_code;
+
+    // STEP 3: Initiate Transaction with Split
+    const transaction = await axios.post(
+      'https://api.paystack.co/transaction/initialize',
+      {
+        email,
+        amount: totalAmount * 100, // in kobo
+        split_code: splitCode,
+        callback_url: 'https://yourplatform.com/payment-success',
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+        },
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      authorization_url: transaction.data.data.authorization_url,
+    });
+  } catch (error: any) {
+    console.error('Transaction error:', error.response?.data || error.message);
+    throw new ValidationError('Payment initialization failed');
+  }
+};
