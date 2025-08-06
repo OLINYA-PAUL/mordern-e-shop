@@ -5,7 +5,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import {
   SingUpSchema,
-  payStackInfo,
+  payStackSchema,
 } from 'apps/user-ui/src/configs/constants/constants';
 import { formData } from 'apps/user-ui/src/configs/constants/global.d.types';
 // import SVGComponent from 'apps/user-ui/src/shared/components';
@@ -21,22 +21,19 @@ import { countries } from 'apps/seller-ui/src/utils/countries/countries';
 import CreateShop from 'apps/seller-ui/src/shared/modules/auth/create-shop/page';
 
 const PaystackBankModal = ({
-  handleChange,
   handleSubmitPayStackInfo,
   setPayStackModel,
-  payStackInfo,
-  form,
+  payStackSubAccount,
 }: {
-  handleChange: any;
   handleSubmitPayStackInfo: any;
   setPayStackModel: any;
-  form: any;
-  payStackInfo: any;
+  payStackSubAccount: any;
 }) => {
   interface payStackData {
+    sellerId: string;
+    bank_code: string; // Seller's bank code (e.g., '058' for Access Bank)
+    account_number: string; // Seller's bank account number
     bank_name: string;
-    bank_code: string;
-    account_number: string;
   }
 
   const {
@@ -45,7 +42,7 @@ const PaystackBankModal = ({
     watch,
     formState: { errors },
   } = useForm<payStackData>({
-    resolver: yupResolver(payStackInfo),
+    resolver: yupResolver(payStackSchema),
   } as any);
 
   const watchedValues = watch();
@@ -63,7 +60,7 @@ const PaystackBankModal = ({
       onClick={(e: any) => {
         if (e.target.id === 'closeModel') {
           e.stopPropagation();
-          setPayStackModel(false);
+          // setPayStackModel(false);
         }
       }}
     >
@@ -134,12 +131,12 @@ const PaystackBankModal = ({
           <button
             type="submit"
             className={`${
-              payStackInfo.isPending ||
+              payStackSubAccount.isPending ||
               (dataEmpty && 'cursor-not-allowed bg-slate-400')
             } w-full bg-black text-white py-2 px-3 mt-2 rounded-md font-medium text-xs transition-colors`}
-            disabled={payStackInfo.isPending || dataEmpty}
+            disabled={payStackSubAccount.isPending || dataEmpty}
           >
-            {payStackInfo.isPending ? 'Please wait...' : 'Submit details'}
+            {payStackSubAccount.isPending ? 'Please wait...' : 'Submit details'}
           </button>
         </form>
       </div>
@@ -159,25 +156,41 @@ const SignUp = () => {
   const [activeStep, setActiveStep] = useState(1);
   const [sellerId, setSellerId] = useState<string | null>(null);
   const [paystackModel, setPayStackModel] = useState<boolean>(false);
-
+  const navigate = useRouter();
   interface PayStackData {
-    name: string;
-    password: string;
-    email: string;
-    phone_number: number;
-    rememberMe: boolean;
-    country: string;
+    sellerId: string;
+    bankCode: string; // Seller's bank code (e.g., '058' for Access Bank)
+    accountNumber: string; // Seller's bank account number
+    bank_name: string;
   }
-  const payStackInfo = useMutation({
+  const payStackSubAccount = useMutation({
     mutationFn: async (data: PayStackData) => {
-      const res = await axiosInstance.post(`/seller-registration`, data);
+      const res = await axiosInstance.post(`/create-paystack-subaccount`, data);
       console.log({ resbody: res.data });
 
       const msg = res?.data?.message || 'OTP sent to your email';
       toast.success(msg);
       return res.data;
     },
-    onSuccess: (_, formData) => {},
+    onSuccess: (res) => {
+      const sub = res.data;
+
+      console.log('account sub===>', { res, sub });
+
+      // Store the details as JSON string in sessionStorage
+      sessionStorage.setItem(
+        'paystackSubAccount',
+        JSON.stringify({
+          bankName: sub.bank_name,
+          accountNumber: sub.account_number,
+          subAccountCode: sub.sub_account,
+          businessName: sub.name,
+        })
+      );
+
+      // Navigate WITHOUT query params (no data in URL)
+      navigate.push('/PaystackSubAccountSuccess');
+    },
     onError: (err: any) => {
       console.log('user error', err);
       if (err instanceof AxiosError) {
@@ -188,20 +201,10 @@ const SignUp = () => {
     },
   });
 
-  const [form, setForm] = useState({
-    bank_name: '',
-    bank_code: '',
-    account_number: '',
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmitPayStackInfo = (data: any, e: React.FormEvent) => {
     e.preventDefault();
-    payStackInfo.mutate(data);
+    const paystackData = { ...data, sellerId };
+    payStackSubAccount.mutate(paystackData);
   };
 
   const {
@@ -662,10 +665,8 @@ const SignUp = () => {
               >
                 {paystackModel ? (
                   <PaystackBankModal
-                    handleChange={handleChange}
                     handleSubmitPayStackInfo={handleSubmitPayStackInfo}
-                    payStackInfo={payStackInfo}
-                    form={form}
+                    payStackSubAccount={payStackSubAccount}
                     setPayStackModel={setPayStackModel}
                   />
                 ) : (

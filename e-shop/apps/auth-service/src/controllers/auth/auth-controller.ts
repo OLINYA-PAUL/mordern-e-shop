@@ -665,20 +665,20 @@ export const createPayStackSubAccount = async (
   next: NextFunction
 ) => {
   try {
-    const { sellerId, bankCode, accountNumber, bank_name } = req.body as {
+    const { sellerId, bank_code, account_number, bank_name } = req.body as {
       sellerId: string;
-      bankCode: string; // Seller's bank code (e.g., '058' for Access Bank)
-      accountNumber: string; // Seller's bank account number
+      bank_code: string;
+      account_number: string;
       bank_name: string;
     };
 
-    if (!sellerId || !bankCode || !accountNumber || !bank_name) {
+    if (!sellerId || !bank_code || !account_number || !bank_name.trim()) {
       throw new ValidationError(
         'sellerId, bankCode, bankname and accountNumber are required'
       );
     }
 
-    // Find the seller from your database
+    // Find the seller in the database
     const seller = await prisma.sellers.findUnique({
       where: { id: sellerId },
     });
@@ -687,14 +687,14 @@ export const createPayStackSubAccount = async (
       throw new ValidationError('Seller not found');
     }
 
-    // Create Paystack subaccount (equivalent to Stripe connect account creation)
+    // Create Paystack subaccount
     const response = await axios.post(
       'https://api.paystack.co/subaccount',
       {
-        business_name: bank_name,
-        settlement_bank: bankCode, // Bank code
-        account_number: accountNumber, // Account number
-        percentage_charge: 10.0, // Platform fee %, adjust as needed
+        business_name: bank_name.trim(),
+        settlement_bank: bank_code,
+        account_number: account_number,
+        percentage_charge: 10.0,
         description: `Subaccount for seller ${seller.name}`,
       },
       {
@@ -707,21 +707,37 @@ export const createPayStackSubAccount = async (
 
     const subaccountCode = response.data.data.subaccount_code;
 
-    // Save the Paystack subaccount code to your DB
-    await prisma.sellers.update({
+    // Update seller record in DB with subaccount info
+    const updatedSeller = await prisma.sellers.update({
       where: { id: sellerId },
-      data: { paystackSubaccountCode: subaccountCode },
+      data: {
+        sub_account: subaccountCode,
+        bank_code,
+        account_number,
+        bank_name,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone_number: true,
+        sub_account: true,
+        bank_code: true,
+        account_number: true,
+        bank_name: true,
+      },
     });
 
-    // Respond with subaccount info
+    // Send back updated account details to the frontend
     res.status(200).json({
       success: true,
-      subaccountCode,
       message: 'Paystack subaccount created successfully',
+      data: updatedSeller,
     });
   } catch (error: any) {
     console.error('Paystack error:', error.response?.data || error.message);
     res.status(500).json({
+      success: false,
       message: error.response?.data?.message || 'Paystack error',
     });
   }
@@ -763,11 +779,11 @@ export const initiateTransactionWithSplit = async (
     const sellers = await prisma.sellers.findMany({
       where: {
         id: { in: Object.keys(sellerTotals) },
-        paystackSubaccountCode: { not: null },
+        sub_account: { not: null },
       },
       select: {
         id: true,
-        paystackSubaccountCode: true,
+        sub_account: true,
       },
     });
 
@@ -776,7 +792,7 @@ export const initiateTransactionWithSplit = async (
       const share = ((sellerAmount / totalAmount) * 100).toFixed(2);
 
       return {
-        subaccount: seller.paystackSubaccountCode,
+        subaccount: seller.sub_account,
         share: Number(share), // Paystack expects numbers, not strings
       };
     });

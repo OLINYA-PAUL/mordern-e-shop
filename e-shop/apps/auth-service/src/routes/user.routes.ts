@@ -41,7 +41,7 @@ authrouter.post('/seller-registration', registerSeller);
 authrouter.post('/verify-seller', verifySellerOtp);
 authrouter.post('/create-shop', createSellerShop);
 authrouter.post('/create-payment-method', connectStripe);
-authrouter.post('/create-paystack-payment-method', createPayStackSubAccount);
+authrouter.post('/create-paystack-subaccount', createPayStackSubAccount);
 authrouter.post('/login-seller', loginSeller);
 authrouter.get(
   '/get-seller',

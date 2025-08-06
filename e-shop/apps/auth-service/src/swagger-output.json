@@ -312,7 +312,7 @@
         }
       }
     },
-    "/create-paystack-payment-method": {
+    "/create-paystack-subaccount": {
       "post": {
         "description": "",
         "parameters": [
@@ -325,10 +325,10 @@
                 "sellerId": {
                   "example": "any"
                 },
-                "bankCode": {
+                "bank_code": {
                   "example": "any"
                 },
-                "accountNumber": {
+                "account_number": {
                   "example": "any"
                 },
                 "bank_name": {
