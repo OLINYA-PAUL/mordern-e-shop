@@ -156,7 +156,7 @@ const SignUp = () => {
   const [activeStep, setActiveStep] = useState(1);
   const [sellerId, setSellerId] = useState<string | null>(null);
   const [paystackModel, setPayStackModel] = useState<boolean>(false);
-
+  const navigate = useRouter();
   interface PayStackData {
     sellerId: string;
     bankCode: string; // Seller's bank code (e.g., '058' for Access Bank)
@@ -172,8 +172,24 @@ const SignUp = () => {
       toast.success(msg);
       return res.data;
     },
-    onSuccess: (_, data) => {
-      console.log({ subaccount: data });
+    onSuccess: (res) => {
+      const sub = res.data;
+
+      console.log('account sub===>', { res, sub });
+
+      // Store the details as JSON string in sessionStorage
+      sessionStorage.setItem(
+        'paystackSubAccount',
+        JSON.stringify({
+          bankName: sub.bank_name,
+          accountNumber: sub.account_number,
+          subAccountCode: sub.sub_account,
+          businessName: sub.name,
+        })
+      );
+
+      // Navigate WITHOUT query params (no data in URL)
+      navigate.push('/PaystackSubAccountSuccess');
     },
     onError: (err: any) => {
       console.log('user error', err);
