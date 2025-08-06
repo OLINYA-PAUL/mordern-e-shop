@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, Copy, ExternalLink, ArrowRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 const PaystackSubAccountSuccess = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -15,6 +16,7 @@ const PaystackSubAccountSuccess = () => {
     percentageCharge: '',
   });
 
+  const Navigate = useRouter();
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 100);
 
@@ -152,7 +154,12 @@ const PaystackSubAccountSuccess = () => {
 
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-2 text-xs">
-            <button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-1.5 rounded-md flex items-center justify-center gap-1 transition-transform duration-150 hover:scale-105">
+            <button
+              className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-1.5 rounded-md flex items-center justify-center gap-1 transition-transform duration-150 hover:scale-105"
+              onClick={() => {
+                Navigate.push('/dashboard');
+              }}
+            >
               Continue to Dashboard <ArrowRight className="w-4 h-4" />
             </button>
           </div>
