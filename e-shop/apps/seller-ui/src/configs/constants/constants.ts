@@ -1,4 +1,5 @@
 import { NavItmesTypes } from './global.d.types';
+import { atom } from 'jotai';
 import * as yup from 'yup';
 
 export const navItems: NavItmesTypes[] = [
@@ -70,3 +71,5 @@ export const createShopSchema = yup
     categories: yup.string().required(),
   })
   .required();
+
+export const activeSideBarItem = atom<string>('/dashboard');

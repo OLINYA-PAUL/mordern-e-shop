@@ -51,5 +51,3 @@ authrouter.get(
 );
 
 export default authrouter;
-
-;
