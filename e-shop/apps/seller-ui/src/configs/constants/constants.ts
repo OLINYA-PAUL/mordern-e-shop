@@ -72,4 +72,4 @@ export const createShopSchema = yup
   })
   .required();
 
-export const activeSideBarItem = atom<string>('/dashboard');
+export const activeSideBarItem = atom<String>('/dashboard');

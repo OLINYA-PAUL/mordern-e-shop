@@ -2,7 +2,7 @@
 import styled from 'styled-components';
 
 // SidebarWrapper component
-export const SidebarWrapper = styled.div`
+export const sidebarWrapper = styled.div`
   background-color: var(--background); // Update your CSS variables as needed
   transition: transform 0.25s ease;
   height: 100%;
@@ -100,7 +100,7 @@ export const Footer = styled.div`
 
 // If you need to export Sidebar with subcomponents
 export const Sidebar = {
-  Wrapper: SidebarWrapper,
+  Wrapper: sidebarWrapper,
   Header,
   Body,
   Overlay,
