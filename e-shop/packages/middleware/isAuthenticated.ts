@@ -36,25 +36,24 @@ export const isAuthenticated = async (
       return next(new Error('Forbidden: Invalid token payload'));
     }
 
-    let user;
+    let account;
 
     if (role === 'user') {
-      user = await prisma.users.findUnique({
+      account = await prisma.users.findUnique({
         where: { id: decoded.id },
       });
-    }
-    if (role === 'seller') {
-      user = await prisma.sellers.findUnique({
+    } else if (role === 'seller') {
+      account = await prisma.sellers.findUnique({
         where: { id: decoded.id },
         include: { shops: true },
       });
     }
 
-    if (!user) {
+    if (!account) {
       return next(new Error('Forbidden: Account not found'));
     }
 
-    req.user = user;
+    req.user = account;
     req.role = role;
     next();
   } catch (err: any) {

@@ -228,30 +228,47 @@ export const refressUserToken = async (
   next: NextFunction
 ) => {
   try {
-    const refreshToken = req.cookies.refress_token.toString();
+    const refreshToken =
+      req.cookies.access_token || req.cookies.seller_access_token;
 
     if (!refreshToken) {
       throw new ValidationError('Unauthorized! No refresh token');
     }
-    // const rawToken = refreshToken.replace(/^"|"$/g, '');
+
     const decoded = jwt.verify(
       refreshToken,
-      process.env.REFRESS_TOKEN_SECRET as string
-    ) as { id: string; role: string } | JwtPayload;
+      process.env.ACCESS_TOKEN_SECRET as string
+    ) as
+      | JwtPayload
+      | {
+          id: string;
+          role: 'user' | 'seller';
+        };
 
-    if (!decoded || !decoded.id || !decoded.role) {
-      throw new JsonWebTokenError('Forbidden! Invalid refresh token');
+    console.log('Decoded Token: ===>', decoded);
+
+    const { id, role } = decoded;
+
+    if (!id || !role) {
+      return next(new Error('Forbidden: Invalid token payload'));
     }
 
-    // Fetch user from database
-    const user = await prisma.users.findUnique({
-      where: { id: decoded.id },
-    });
+    let account;
 
-    if (!user) {
-      throw new ValidationError('User not found');
+    if (role === 'user') {
+      account = await prisma.users.findUnique({
+        where: { id: decoded.id },
+      });
+    } else if (role === 'seller') {
+      account = await prisma.sellers.findUnique({
+        where: { id: decoded.id },
+        include: { shops: true },
+      });
     }
 
+    if (!account) {
+      return next(new Error('Forbidden: Account not found'));
+    }
     // Create new access token
     const newAccessToken = jwt.sign(
       { id: decoded.id, role: decoded.role },
@@ -260,7 +277,11 @@ export const refressUserToken = async (
     );
 
     // Set new access token cookie
-    setCookies(res, 'access_token', newAccessToken, true);
+    if (decoded.role === 'user') {
+      setCookies(res, 'access_token', newAccessToken, true);
+    } else if (decoded.role === 'seller') {
+      setCookies(res, 'seller_access_token', newAccessToken, true);
+    }
 
     res.status(201).json({ message: 'Access token refreshed' });
   } catch (error) {
