@@ -35,7 +35,7 @@ export default function RootLayout({
       <body className="w-full">
         <Provider>
           {/* <Header /> */}
-          <main className="w-full">
+          <main className="w-full min-h-screen bg-slate-900 font-sans antialiased">
             {children}
             <Toaster />
           </main>
