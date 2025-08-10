@@ -54,7 +54,7 @@ const Login = () => {
       return res.data;
     },
     onSuccess: (_, formData) => {
-      router.push('/');
+      router.push('/dashboard');
       setServerError('');
     },
     onError: (err: any) => {

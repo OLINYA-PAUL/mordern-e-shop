@@ -32,7 +32,12 @@ authrouter.post('/request-passwordreset', requestPasswordReset);
 authrouter.post('/verify-otp', verifyForgetPasswordOtp);
 authrouter.post('/reset-password', resetUserPassword);
 authrouter.post('/logout-user', logOutUser);
-authrouter.get('/get-auth-user', isAuthenticated, getUser);
+authrouter.get(
+  '/get-auth-user',
+  authorizeRoles('user'),
+  isAuthenticated,
+  getUser
+);
 authrouter.get('/auth-user', isAuthenticated);
 
 // seller registration
