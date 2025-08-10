@@ -180,6 +180,9 @@ export const loginUser = async (
       throw new ValidationError('Invalid password');
     }
 
+    res.clearCookie('access_token');
+    res.clearCookie('refress_token');
+
     // Here you would typically generate a JWT token and send it back
     const access_token = accessToken({ id: user.id, role: 'user' });
     const refress_token = refressToken({ id: user.id, role: 'user' });
@@ -283,6 +286,7 @@ export const refressUserToken = async (
       setCookies(res, 'seller_access_token', newAccessToken, true);
     }
 
+    req.role = decoded.role;
     res.status(201).json({ message: 'Access token refreshed' });
   } catch (error) {
     console.error('Error refreshing user token:', error);
@@ -348,6 +352,7 @@ interface ISellerAuth {
   country: string;
   phone_number: string;
   password: string;
+  shopId: string;
 }
 
 export const registerSeller = async (
@@ -424,6 +429,7 @@ export const verifySellerOtp = async (
     const hashPassword = await bcrypt.hash(password, 10);
     const seller = await prisma.sellers.create({
       data: { email, name, password: hashPassword, country, phone_number },
+      include: { shops: true },
     });
 
     res.status(200).json({
@@ -629,6 +635,9 @@ export const loginSeller = async (
       throw new ValidationError('Invalid password');
     }
 
+    res.clearCookie('seller_access_token');
+    res.clearCookie('seller_refress_token');
+
     // Here you would typically generate a JWT token and send it back
     const access_token = accessToken({ id: seller.id, role: 'seller' });
     const refress_token = refressToken({ id: seller.id, role: 'seller' });
@@ -664,6 +673,7 @@ export const getSeller = async (
 
     const seller = await prisma.sellers.findUnique({
       where: { id: userId },
+      include: { shops: true },
     });
 
     if (!seller) {

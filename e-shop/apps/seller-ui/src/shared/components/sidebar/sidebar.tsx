@@ -5,13 +5,20 @@ import { usePathname } from 'next/navigation';
 import React from 'react';
 import { useEffect } from 'react';
 import Box from '../box';
-import { Sidebar, sidebarWrapper } from './sidebarStyles';
+import { Sidebar } from './sidebarStyles';
+
+import Link from 'next/link';
+import Image from 'next/image';
+import useSeller from 'apps/seller-ui/src/useHook/useSeller';
 
 const SidebarWrapper = () => {
   const pathName = usePathname();
   const { activeSidebar, setActiveSidebar } = UseSidebar();
+  const { error, seller, isLoading } = useSeller();
 
-  const { Wrapper } = Sidebar;
+  console.log({ 'useSller====>': seller });
+
+  const { Header } = Sidebar;
 
   useEffect(() => {
     setActiveSidebar(pathName);
@@ -33,7 +40,26 @@ const SidebarWrapper = () => {
           scrollbarWidth: 'none',
         }}
         className="sidebar-wraper"
-      ></Box>
+      >
+        <Header>
+          <Box>
+            <Link href={`${'/'}`} className="flex gap-2 items-center">
+              <Image
+                src={
+                  'https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg'
+                }
+                alt="Seller_image_profile"
+                height={20}
+                width={20}
+                className="object-contain  rounded-full"
+              />
+              <h2 className="text-white font-poppins text-xs ">
+                {seller?.shops.map((x) => x.name)}
+              </h2>
+            </Link>
+          </Box>
+        </Header>
+      </Box>
     </div>
   );
 };
