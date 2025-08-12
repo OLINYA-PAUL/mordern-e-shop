@@ -10,6 +10,14 @@ import { Sidebar } from './sidebarStyles';
 import Link from 'next/link';
 import Image from 'next/image';
 import useSeller from 'apps/seller-ui/src/useHook/useSeller';
+import { ActivityIcon, Home } from 'lucide-react';
+import SidebarItems from './sidebarItems';
+import SidebarMenu from './sidebarMenu';
+import { MdOutlinePayments } from 'react-icons/md';
+import { AiFillProduct } from 'react-icons/ai';
+import { FaSquarePlus } from 'react-icons/fa6';
+import { FaCalendarAlt } from 'react-icons/fa';
+import { IoNotificationsCircleOutline } from 'react-icons/io5';
 
 const SidebarWrapper = () => {
   const pathName = usePathname();
@@ -18,7 +26,7 @@ const SidebarWrapper = () => {
 
   console.log({ 'useSller====>': seller });
 
-  const { Header } = Sidebar;
+  const { Header, Body } = Sidebar;
 
   useEffect(() => {
     setActiveSidebar(pathName);
@@ -42,21 +50,125 @@ const SidebarWrapper = () => {
         className="sidebar-wraper"
       >
         <Header>
-          <Box>
-            <Link href={`${'/'}`} className="flex gap-2 items-center">
-              <Image
-                src={
-                  'https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg'
-                }
-                alt="Seller_image_profile"
-                height={20}
-                width={20}
-                className="object-contain  rounded-full"
-              />
-              <h2 className="text-white font-poppins text-xs ">
-                {seller?.shops.map((x) => x.name)}
-              </h2>
+          <Box
+            css={{
+              width: '100%',
+            }}
+          >
+            <Link
+              href={`${'/profile'}`}
+              className="flex gap-3 items-center p-3 rounded-xl bg-gradient-to-r from-gray-800/50 to-gray-700/30 backdrop-blur-sm border border-gray-600/20 hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10"
+            >
+              <div className="relative">
+                <Image
+                  src={
+                    'https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg'
+                  }
+                  alt="Seller_image_profile"
+                  height={36}
+                  width={36}
+                  className="object-cover rounded-full ring-2 ring-blue-500/20"
+                />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-800"></div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-white font-poppins text-[11px] font-semibold leading-tight">
+                  {seller?.shops.name}
+                </h2>
+                <h5 className="text-gray-300 font-poppins text-[10px] font-normal truncate max-w-[140px] mt-0.5">
+                  {seller?.shops.address}
+                </h5>
+              </div>
             </Link>
+            <Header>
+              <div className="w-full h-full  my-5">
+                <Body className="body sidebar">
+                  <SidebarItems
+                    title={'Dashboard'}
+                    icons={
+                      <Home color={getIconsColor('/dashboard')} size={20} />
+                    }
+                    isActive={activeSidebar === '/dashboard'}
+                    href={'/dashboard'}
+                  />
+                  <div className="w-full block mt-5">
+                    <SidebarMenu title="Main menu">
+                      <SidebarItems
+                        title={'orders'}
+                        icons={
+                          <ActivityIcon
+                            color={getIconsColor('/dashboard/orders')}
+                            size={20}
+                          />
+                        }
+                        isActive={activeSidebar === '/dashboard/orders'}
+                        href={'/dashboard/orders'}
+                      />
+                      <SidebarItems
+                        title={'Payments'}
+                        icons={
+                          <MdOutlinePayments
+                            color={getIconsColor('/dashboard/payments')}
+                            size={20}
+                          />
+                        }
+                        isActive={activeSidebar === '/dashboard/payments'}
+                        href={'/dashboard/payments'}
+                      />
+                    </SidebarMenu>
+                    <SidebarMenu title="Products">
+                      <SidebarItems
+                        title={'Create Products'}
+                        icons={
+                          <FaSquarePlus
+                            color={getIconsColor('/dashboard/create-product')}
+                            size={20}
+                          />
+                        }
+                        isActive={activeSidebar === '/dashboard/create-product'}
+                        href={'/dashboard/create-product'}
+                      />
+                      <SidebarItems
+                        title={'All Products'}
+                        icons={
+                          <AiFillProduct
+                            color={getIconsColor('/dashboard/all-product')}
+                            size={20}
+                          />
+                        }
+                        isActive={activeSidebar === '/dashboard/all-product'}
+                        href={'/dashboard/all-product'}
+                      />
+                    </SidebarMenu>
+
+                    <SidebarMenu title="Events">
+                      <SidebarItems
+                        title={'Create Events'}
+                        icons={
+                          <FaCalendarAlt
+                            color={getIconsColor('/dashboard/create-Events')}
+                            size={20}
+                          />
+                        }
+                        isActive={activeSidebar === '/dashboard/create-Events'}
+                        href={'/dashboard/create-Events'}
+                      />
+                      <SidebarItems
+                        title={'All Events'}
+                        icons={
+                          <IoNotificationsCircleOutline
+                            color={getIconsColor('/dashboard/all-Events')}
+                            size={20}
+                          />
+                        }
+                        isActive={activeSidebar === '/dashboard/all-Events'}
+                        href={'/dashboard/all-Events'}
+                      />
+                    </SidebarMenu>
+                  </div>
+                </Body>
+              </div>
+            </Header>
           </Box>
         </Header>
       </Box>

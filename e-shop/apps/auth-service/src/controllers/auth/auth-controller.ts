@@ -287,7 +287,9 @@ export const refressUserToken = async (
     }
 
     req.role = decoded.role;
-    res.status(201).json({ message: 'Access token refreshed' });
+
+    next();
+    // res.status(201).json({ message: 'Access token refreshed' });
   } catch (error) {
     console.error('Error refreshing user token:', error);
     next(error);

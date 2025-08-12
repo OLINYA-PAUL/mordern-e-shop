@@ -29,8 +29,8 @@ export default function RootLayout({
     <html lang="en" className={`${roboto.variable} ${poppins.variable}`}>
       <body className="w-full">
         {/* <Header /> */}
-        <div className="w-full h-full bg-black min-h-screen text-white flex gap-5">
-          <aside className="w-[200px] min-w-[150px] max-w-[220px]  h-screen border-r border-r-slate-900 p-4 text-white">
+        <div className="w-full h-full bg-black min-h-screen text-white flex gap-5 overflow-hidden">
+          <aside className="w-[250px] min-w-[200px] max-w-[300px]  h-screen border-r border-r-slate-900 p-4 text-white">
             <div className="sticky top-0">
               <SidebarWrapper />
             </div>

@@ -88,7 +88,7 @@ model sellers {
   country        String?
   phone_number   String?
   stripeId       String?
-  shops          Shops[]  @relation("SellerShops") // ← add this
+  shops          Shops?   @relation("SellerShops") // ← add this
   sub_account    String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
