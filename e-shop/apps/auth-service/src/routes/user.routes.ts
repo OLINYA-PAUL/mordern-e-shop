@@ -27,15 +27,16 @@ const authrouter: Router = express.Router();
 authrouter.post('/user-registration', registerUser);
 authrouter.post('/verify-user', verifyUserOtp);
 authrouter.post('/login-user', loginUser);
-authrouter.post('/refress_token', refressUserToken);
+// authrouter.post('/refress_token', refressUserToken);
 authrouter.post('/request-passwordreset', requestPasswordReset);
 authrouter.post('/verify-otp', verifyForgetPasswordOtp);
 authrouter.post('/reset-password', resetUserPassword);
 authrouter.post('/logout-user', logOutUser);
 authrouter.get(
   '/get-auth-user',
-  authorizeRoles('user'),
   isAuthenticated,
+  authorizeRoles('user'),
+  refressUserToken,
   getUser
 );
 authrouter.get('/auth-user', isAuthenticated);
@@ -52,6 +53,7 @@ authrouter.get(
   '/get-seller',
   isAuthenticated,
   authorizeRoles('seller'),
+  refressUserToken,
   getSeller
 );
 

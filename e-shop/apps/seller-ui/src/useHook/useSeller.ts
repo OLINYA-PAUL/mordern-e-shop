@@ -33,7 +33,7 @@ type Seller = {
   stripeId: string;
   sub_account: string;
   updatedAt: string;
-  shops: IShop[];
+  shops: IShop;
 };
 
 const getSeller = async (): Promise<Seller> => {

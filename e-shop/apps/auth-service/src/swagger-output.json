@@ -101,16 +101,6 @@
         }
       }
     },
-    "/refress_token": {
-      "post": {
-        "description": "",
-        "responses": {
-          "201": {
-            "description": "Created"
-          }
-        }
-      }
-    },
     "/request-passwordreset": {
       "post": {
         "description": "",
