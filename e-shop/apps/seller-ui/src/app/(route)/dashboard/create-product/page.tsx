@@ -38,14 +38,16 @@ const CreateProduct = () => {
     setOpenImageModel(false);
   };
 
+  // const updatedImages = images.filter((_, i) => i !== index);
+  // setImages(updatedImages);
   const onFileRemove = (index: number) => {
-    // const updatedImages = images.filter((_, i) => i !== index);
-    // setImages(updatedImages);
+    console.log('Removing image at index:', index);
 
     setImages((prevImages) => {
       const updatedImages = [...prevImages];
+      console.log('Updated images before removal:', updatedImages);
 
-      if (index === -1 || index === images.length - 1) {
+      if (index === -1) {
         updatedImages[0] = null;
       } else {
         updatedImages.splice(index, 1);
@@ -54,11 +56,13 @@ const CreateProduct = () => {
       if (updatedImages.includes(null) && updatedImages.length < 8) {
         updatedImages.push(null);
       }
+
+      // Update form value with the new images array
+      setValue('images', updatedImages);
+
       return updatedImages;
     });
-    setValue('images', images);
   };
-
   return (
     <div
       className="w-full m-auto p-4 shadow-md rounded-md text-white "
@@ -76,17 +80,40 @@ const CreateProduct = () => {
       </div>
       <div className="flex gap-4 py-4 w-full">
         <div className="w-[35%]  rounded-md h-auto p-3">
-          <ImagePlaceHolders
-            size={false}
-            small={'765 x 850'}
-            onFileChange={onFileChange}
-            onFileRemove={onFileRemove}
-            defaultImage={
-              'https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg'
-            }
-            index={0}
-            setOpenImageModel={setOpenImageModel}
-          />
+          {images.length <= 0 && (
+            <>
+              <ImagePlaceHolders
+                small={false}
+                size={'500 x 300'}
+                onFileChange={onFileChange}
+                onFileRemove={onFileRemove}
+                defaultImage={
+                  'https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg'
+                }
+                index={0}
+                setOpenImageModel={setOpenImageModel}
+              />
+            </>
+          )}
+
+          <div className="grid grid-cols-2 mt-3 gap-4">
+            {images.slice(1).map((image, index) => (
+              <>
+                <ImagePlaceHolders
+                  small
+                  key={index}
+                  size={'500 x 300'}
+                  onFileChange={onFileChange}
+                  onFileRemove={onFileRemove}
+                  defaultImage={
+                    'https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg'
+                  }
+                  index={index + 1}
+                  setOpenImageModel={setOpenImageModel}
+                />
+              </>
+            ))}
+          </div>
         </div>
       </div>
     </div>
