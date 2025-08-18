@@ -16,8 +16,11 @@ import SidebarMenu from './sidebarMenu';
 import { MdOutlinePayments } from 'react-icons/md';
 import { AiFillProduct } from 'react-icons/ai';
 import { FaSquarePlus } from 'react-icons/fa6';
-import { FaCalendarAlt } from 'react-icons/fa';
-import { IoNotificationsCircleOutline } from 'react-icons/io5';
+import { BsCalendarEventFill } from 'react-icons/bs';
+import { IoNotifications } from 'react-icons/io5';
+import { IoMail } from 'react-icons/io5';
+import { IoSettingsSharp } from 'react-icons/io5';
+import { MdEventRepeat } from 'react-icons/md';
 
 const SidebarWrapper = () => {
   const pathName = usePathname();
@@ -145,7 +148,7 @@ const SidebarWrapper = () => {
                       <SidebarItems
                         title={'Create Events'}
                         icons={
-                          <FaCalendarAlt
+                          <BsCalendarEventFill
                             color={getIconsColor('/dashboard/create-Events')}
                             size={20}
                           />
@@ -156,13 +159,61 @@ const SidebarWrapper = () => {
                       <SidebarItems
                         title={'All Events'}
                         icons={
-                          <IoNotificationsCircleOutline
+                          <MdEventRepeat
                             color={getIconsColor('/dashboard/all-Events')}
                             size={20}
                           />
                         }
                         isActive={activeSidebar === '/dashboard/all-Events'}
                         href={'/dashboard/all-Events'}
+                      />
+                    </SidebarMenu>
+                    <SidebarMenu title="Controllers">
+                      <SidebarItems
+                        title={'Inbox'}
+                        icons={
+                          <IoMail
+                            color={getIconsColor('/dashboard/inbox')}
+                            size={20}
+                          />
+                        }
+                        isActive={activeSidebar === '/dashboard/inbox'}
+                        href={'/dashboard/inbox'}
+                      />
+                      <SidebarItems
+                        title={'Settings'}
+                        icons={
+                          <IoSettingsSharp
+                            color={getIconsColor('/dashboard/settings')}
+                            size={20}
+                          />
+                        }
+                        isActive={activeSidebar === '/dashboard/settings'}
+                        href={'/dashboard/settings'}
+                      />
+                      <SidebarItems
+                        title={'Notifications'}
+                        icons={
+                          <IoNotifications
+                            color={getIconsColor('/dashboard/notifications')}
+                            size={20}
+                          />
+                        }
+                        isActive={activeSidebar === '/dashboard/notifications'}
+                        href={'/dashboard/notifications'}
+                      />
+                    </SidebarMenu>
+                    <SidebarMenu title="Extras">
+                      <SidebarItems
+                        title={'Discount Codes'}
+                        icons={
+                          <MdEventRepeat
+                            color={getIconsColor('/dashboard/discount-codes')}
+                            size={20}
+                          />
+                        }
+                        isActive={activeSidebar === '/dashboard/discount-codes'}
+                        href={'/dashboard/discount-codes'}
                       />
                     </SidebarMenu>
                   </div>

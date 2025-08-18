@@ -15,7 +15,7 @@ const SidebarItems = ({
   return (
     <Link href={href} className="w-full my-3">
       <div
-        className={`w-full flex items-center p-2 gap-3  cursor-pointer ${
+        className={`w-full flex items-center p-2 gap-3  cursor-pointer  rounded-md ${
           isActive
             ? 'bg-[#053158] scale-[.98]  hover:!bg-[#053158d6]'
             : 'hover:!bg-[#053158d6]'
