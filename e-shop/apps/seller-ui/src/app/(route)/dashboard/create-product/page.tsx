@@ -1,5 +1,6 @@
 'use client';
 
+import ColorSelector from 'apps/seller-ui/src/shared/components/ColorSelector/ColorSelector';
 import ImagePlaceHolders from 'apps/seller-ui/src/shared/components/image-placeholders/page';
 import ProductInput from 'apps/seller-ui/src/shared/components/ProductInput/page';
 import { ChevronRightIcon } from 'lucide-react';
@@ -9,16 +10,13 @@ import { useForm } from 'react-hook-form';
 const CreateProduct = () => {
   const handleCreateProduct = (data: any) => {
     console.log('Product created:', data);
-    // Add your product creation logic here
   };
 
   const {
     handleSubmit,
     register,
-    watch,
-    control,
-    setFocus,
     setValue,
+    control,
     formState: { errors },
   } = useForm();
 
@@ -47,8 +45,6 @@ const CreateProduct = () => {
 
   const [openImageModel, setOpenImageModel] = useState<boolean>(false);
   const [images, setImages] = useState<(File | null)[]>([null]);
-  const [loading, setLoading] = useState<boolean>(false);
-
   const [selectedSize, setSelectedSize] = useState<string>(
     `${productImageSizes[0].width}x${productImageSizes[0].height}`
   );
@@ -66,66 +62,64 @@ const CreateProduct = () => {
     setOpenImageModel(false);
   };
 
-  // const updatedImages = images.filter((_, i) => i !== index);
-  // setImages(updatedImages);
   const onFileRemove = (index: number) => {
-    console.log('Removing image at index:', index);
+    if (index < 0 || index >= images.length) return;
 
-    setImages((prevImages) => {
-      const updatedImages = [...prevImages];
-      console.log('Updated images before removal:', updatedImages);
+    // Copy current images
+    let updatedImages = [...images];
 
-      if (index === -1) {
-        updatedImages[0] = null;
-      } else {
-        updatedImages.splice(index, 1);
-      }
+    // Remove the selected image
+    updatedImages.splice(index, 1);
 
-      if (updatedImages.includes(null) && updatedImages.length < 8) {
-        updatedImages.push(null);
-      }
+    // Ensure at least one null placeholder exists
+    if (!updatedImages.includes(null)) {
+      updatedImages.push(null);
+    }
 
-      // Update form value with the new images array
-      setValue('images', updatedImages);
-
-      return updatedImages;
-    });
+    // Update state and form value
+    setImages(updatedImages);
+    setValue('images', updatedImages);
   };
+
+  const countWords = (str: string) => {
+    return str.trim().split(/\s+/).length;
+  };
+
   return (
     <form
-      className="w-full m-auto p-4 shadow-md rounded-md text-white "
+      className="w-full m-auto p-4 shadow-md rounded-md text-white"
       onSubmit={handleSubmit(handleCreateProduct)}
     >
       <h2 className="text-xl font-poppins py-2 font-semibold">
         Create New Product
       </h2>
-      <div className="flex items-center ">
+
+      <div className="flex items-center">
         <span className="text-xs text-slate-300 cursor-pointer">Dashboard</span>
         <ChevronRightIcon className="opacity-70 cursor-pointer" size={15} />
         <span className="text-xs text-slate-300 cursor-pointer">
           Create Product
         </span>
       </div>
-      <div className="flex gap-10 py-4 w-full">
-        <div className="md:w-[35%]  rounded-md h-auto ">
+
+      {/* ✅ Responsive Wrapper */}
+      <div className="flex flex-col md:flex-row gap-10 py-4 w-full">
+        {/* Left Section */}
+        <div className="md:w-[35%] w-full rounded-md h-auto">
           {images.length > 0 && (
-            <>
-              <ImagePlaceHolders
-                small={false}
-                size={selectedSize}
-                onFileChange={onFileChange}
-                onFileRemove={onFileRemove}
-                defaultImage={
-                  'https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg'
-                }
-                index={0}
-                setOpenImageModel={setOpenImageModel}
-              />
-            </>
+            <ImagePlaceHolders
+              small={false}
+              size={selectedSize}
+              onFileChange={onFileChange}
+              onFileRemove={onFileRemove}
+              defaultImage="https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg"
+              index={0}
+              setOpenImageModel={setOpenImageModel}
+            />
           )}
 
           <select
-            className="w-full mt-2 cursor-pointer  mb-2 bg-slate-800 text-white text-sm rounded p-1 focus:outline-none focus:ring-0 border-0"
+            className="w-full mt-2 cursor-pointer mb-2 bg-slate-800 text-white text-sm rounded p-1 focus:outline-none focus:ring-0 border-0"
             onChange={(e: any) => {
               setSelectedSize(e.target.value);
             }}
@@ -134,46 +128,164 @@ const CreateProduct = () => {
               <option
                 key={index}
                 value={`${size.width} x ${size.height}`}
-                className="bg-slate-800 text-white cursor-pointer "
+                className="bg-slate-800 text-white cursor-pointer"
               >
                 {size.width} x {size.height}
               </option>
             ))}
           </select>
 
-          <div className="grid grid-cols-2 mt-3 gap-4">
-            {images.slice(1).map((image, index) => (
-              <>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 mt-3 gap-4">
+            {images.slice(1).map((_, index) => {
+              console.log(index, 'image index');
+
+              return (
                 <ImagePlaceHolders
                   small
                   key={index}
                   size={'300 x 300'}
                   onFileChange={onFileChange}
                   onFileRemove={onFileRemove}
-                  defaultImage={
-                    'https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg'
-                  }
-                  index={index + 1}
+                  defaultImage="https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg"
+                  index={index}
                   setOpenImageModel={setOpenImageModel}
                 />
-              </>
-            ))}
+              );
+            })}
           </div>
         </div>
-        <div className="md:w-[65%]  rounded-md h-auto  ">
-          <div className="w-full flex gap-5">
-            <div className="w-2/4">
-              <ProductInput
-                label={'Product name'}
-                type={'text'}
-                className={
-                  'mt-2  text-black !bg-slate-600 !border-0 !outline-0 !focus:outline-0 !focus:border-0 rounded-full'
-                }
-                placeholder="enter Product name"
-                {...register('title', {
-                  required: 'Value is required',
-                })}
-              />
+
+        {/* Right Section */}
+        <div className="md:w-[65%] w-full rounded-md h-auto">
+          <div className="w-full flex flex-col sm:flex-row gap-5">
+            <div className="w-full sm:w-2/4">
+              <div className="w-full">
+                <ProductInput
+                  label={'Product name'}
+                  type={'text'}
+                  className="mt-2  !bg-slate-800 text-white  rounded-md"
+                  placeholder="enter Product name"
+                  {...register('title', {
+                    required: 'Value is required',
+                  })}
+                />
+                {errors.title && (
+                  <p className="text-[11px] font-poppins text-red-500 mt-1">
+                    {String(errors.title.message)}
+                  </p>
+                )}
+              </div>
+              <div className="w-full mt-2">
+                <ProductInput
+                  label={'product description'}
+                  type={'textarea'}
+                  className=" mt-2 !bg-slate-800 text-white  rounded-md"
+                  placeholder="enter Product name"
+                  cols={5}
+                  rows={5}
+                  {...register('product_description', {
+                    validate: (value) => {
+                      if (!value) return true; // Let required validation handle empty values
+                      return (
+                        countWords(value) <= 100 ||
+                        'Bio must be less than 100 words'
+                      );
+                    },
+                  })}
+                />
+                {errors.product_description && (
+                  <p className="text-[11px] font-poppins text-red-500 mt-1">
+                    {String(errors.product_description.message)}
+                  </p>
+                )}
+              </div>
+              <div className="w-full">
+                <ProductInput
+                  label={'Product tags *'}
+                  type={'text'}
+                  className="mt-2  !bg-slate-800 text-white  rounded-md"
+                  placeholder="Separate tags with commas: electronics, gadgets, etc."
+                  {...register('tags', {
+                    required: 'Value is required',
+                  })}
+                  required
+                />
+                {errors.tags && (
+                  <p className="text-[11px] font-poppins text-red-500 mt-1">
+                    {String(errors.tags.message)}
+                  </p>
+                )}
+              </div>
+              <div className="w-full mt-2">
+                <ProductInput
+                  label={'Product Waranty *'}
+                  type={'text'}
+                  className="mt-2  !bg-slate-800 text-white  rounded-md"
+                  placeholder="Product Waranty"
+                  {...register('Waranty', {
+                    required: 'Value is required',
+                  })}
+                />
+                {errors.Waranty && (
+                  <p className="text-[11px] font-poppins text-red-500 mt-1">
+                    {String(errors.Waranty.message)}
+                  </p>
+                )}
+              </div>
+              <div className="w-full  mt-2">
+                <ProductInput
+                  label={'Product Sloug *'}
+                  type={'text'}
+                  className="mt-2  !bg-slate-800 text-white  rounded-md"
+                  placeholder="eneter product slug"
+                  {...register('slug', {
+                    required: 'Value is required',
+                    pattern: {
+                      value: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+                      message: 'Slug must be lowercase and hyphen-separated',
+                    },
+                    maxLength: {
+                      value: 50,
+                      message: 'Slug must be less than 50 characters',
+                    },
+                    validate: (value) => {
+                      const words = value.split('-');
+                      return (
+                        words.length <= 5 ||
+                        'Slug must not exceed 5 hyphen-separated words'
+                      );
+                    },
+                    minLength: {
+                      value: 3,
+                      message: 'Slug must be at least 3 characters long',
+                    },
+                  })}
+                />
+                {errors.slug && (
+                  <p className="text-[11px] font-poppins text-red-500 mt-1">
+                    {String(errors.slug.message)}
+                  </p>
+                )}
+              </div>
+              <div className="w-full mt-2">
+                <ProductInput
+                  label={'Brand *'}
+                  type={'text'}
+                  className="mt-2  !bg-slate-800 text-white  rounded-md"
+                  placeholder="Product Brand"
+                  {...register('brand', {
+                    required: 'Value is required',
+                  })}
+                />
+                {errors.brand && (
+                  <p className="text-[11px] font-poppins text-red-500 mt-1">
+                    {String(errors.brand.message)}
+                  </p>
+                )}
+              </div>
+              <div className="w- mt-5">
+                <ColorSelector control={control} name="" />
+              </div>
             </div>
           </div>
         </div>

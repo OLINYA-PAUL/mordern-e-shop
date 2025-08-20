@@ -4,12 +4,12 @@ import { Pencil, WandSparkles, X } from 'lucide-react';
 import React from 'react';
 
 interface ImagePlaceHoldersProps {
-  size?: string;
+  size: string;
   small?: boolean;
   onFileChange: (file: File, index: number) => void;
   onFileRemove: (index: number) => void;
-  defaultImage?: string | null;
-  index?: number | null;
+  defaultImage: string | null;
+  index: number;
   setOpenImageModel: (open: boolean) => void;
 }
 
@@ -18,8 +18,8 @@ const ImagePlaceHolders = ({
   size,
   onFileChange,
   onFileRemove,
-  defaultImage = null,
-  index = null,
+  defaultImage,
+  index,
   setOpenImageModel,
 }: ImagePlaceHoldersProps) => {
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
@@ -29,7 +29,6 @@ const ImagePlaceHolders = ({
     if (file && onFileChange) {
       setImagePreview(URL.createObjectURL(file));
       onFileChange(file, index ?? 0);
-      onFileRemove(index!);
     }
   };
 
@@ -59,7 +58,11 @@ const ImagePlaceHolders = ({
         <>
           <button
             type="button"
-            onClick={() => onFileRemove(index!)}
+            onClick={() => {
+              onFileRemove(index);
+
+              console.log('Image removed ===>', index);
+            }}
             className="absolute top-3 right-3 p-2 rounded bg-red-700 shadow-sm cursor-pointer"
           >
             <X size={20} />
@@ -103,13 +106,11 @@ const ImagePlaceHolders = ({
             {size
               ? 'Click to upload image'
               : 'Click the pen icon to Upload image'}{' '}
-            {typeof size === 'string' &&
-              `Size: ${size.split('x')[0].trim()} x ${size
-                .split('x')[1]
-                .trim()}`}
+            {size}
           </p>
-          <p className="text-gray-500 font-poppins text-sm mt-5">
-            Please choose an image <br /> with the expected ration
+          <p className="text-gray-400 font-poppins text-xs text-center mt-5">
+            Please choose an image with the <br />
+            expected ration
           </p>
         </div>
       )}
