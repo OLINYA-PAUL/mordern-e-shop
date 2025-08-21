@@ -284,7 +284,7 @@ const CreateProduct = () => {
                 )}
               </div>
               <div className="w- mt-5">
-                <ColorSelector control={control} name="" />
+                <ColorSelector control={control} error={errors} />
               </div>
               <div className="w- mt-5">
                 <CustomSpecification

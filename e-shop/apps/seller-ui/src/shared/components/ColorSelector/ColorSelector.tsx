@@ -6,27 +6,24 @@ interface ColorSelectorProps {
   control: Control<any>; // or specify your form type instead of 'any'
   name?: string;
   defaultValue?: string;
+  error: any;
 }
 
 const ColorSelector = ({
   control,
   name = 'color',
   defaultValue = '',
+  error,
 }: ColorSelectorProps) => {
   const defaultColor = [
-    // Core Brand
-    '#0F172A', // Midnight Navy
-    '#FACC15', // Golden Yellow
-    '#22C55E', // Fresh Green
-    '#3B82F6', // Vibrant Blue
-
-    // Supportive Accents
-    '#F97316', // Energy Orange
-    '#EC4899', // Playful Pink
-    '#8B5CF6', // Creative Purple
-    '#14B8A6', // Calm Teal
-
-    // Neutral Scale (Light → Dark)
+    '#0F172A',
+    '#FACC15',
+    '#22C55E',
+    '#3B82F6',
+    '#F97316',
+    '#EC4899',
+    '#8B5CF6',
+    '#14B8A6',
     '#F9FAFB',
     '#F3F4F6',
     '#E5E7EB',
@@ -37,33 +34,27 @@ const ColorSelector = ({
     '#374151',
     '#1F2937',
     '#111827',
-
-    // Status / Feedback Colors
-    '#16A34A', // Green
-    '#DC2626', // Red
-    '#D97706', // Amber
+    '#16A34A',
+    '#DC2626',
+    '#D97706',
   ];
 
   const [customeColor, setcustomeColor] = useState<string[]>([]);
   const [showColorPicker, setshowColorPicker] = useState<boolean>(false);
   const [newColor, setnewColor] = useState<string>('#000000');
 
-  // Load custom colors from localStorage on component mount
   useEffect(() => {
     try {
       const savedColors = localStorage.getItem('customColors');
       if (savedColors) {
         const parsedColors = JSON.parse(savedColors);
-        if (Array.isArray(parsedColors)) {
-          setcustomeColor(parsedColors);
-        }
+        if (Array.isArray(parsedColors)) setcustomeColor(parsedColors);
       }
     } catch (error) {
       console.error('Failed to load colors from localStorage:', error);
     }
   }, []);
 
-  // Helper function to save colors to localStorage
   const saveColorsToStorage = (colors: string[]) => {
     try {
       localStorage.setItem('customColors', JSON.stringify(colors));
@@ -72,12 +63,11 @@ const ColorSelector = ({
     }
   };
 
-  // Helper function to determine if a color is light
   const isLightColor = (hex: string) => {
     const rgb = parseInt(hex.slice(1), 16);
     const r = (rgb >> 16) & 0xff;
     const g = (rgb >> 8) & 0xff;
-    const b = (rgb >> 0) & 0xff;
+    const b = rgb & 0xff;
     const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
     return luma > 128;
   };
@@ -89,20 +79,11 @@ const ColorSelector = ({
         key={defaultColor.length}
         defaultValue={defaultValue || []}
         control={control}
-        render={({
-          field: { onChange, value, ref },
-          fieldState: { error },
-        }) => (
-          <div className="flex flex-wrap gap-2">
+        render={({ field: { onChange, value } }) => (
+          <div className="flex flex-wrap gap-1">
             {[...defaultColor, ...customeColor].map((color, index) => {
               const isSelected = value.includes(color);
               const lightColor = isLightColor(color);
-
-              console.log({
-                'Color:': color,
-                'Is Selected:': isSelected,
-                'Light Color:': lightColor,
-              });
 
               return (
                 <button
@@ -115,31 +96,23 @@ const ColorSelector = ({
                         ? currentValue.filter((c: string) => c !== color)
                         : [...currentValue, color]
                     );
-
-                    console.log({
-                      'Updated Value:': isSelected,
-                      currentValue: currentValue,
-                      'New Value:': isSelected,
-                    });
                   }}
                   className={`
-                    w-8 h-8 rounded-full border-2 transition-all duration-200 ease-in-out
+                    w-6 h-6 rounded-full border-2 transition-all duration-200
                     flex items-center justify-center relative overflow-hidden
-                    hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                    hover:scale-110 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1
                     ${
                       isSelected
-                        ? 'border-gray-800 shadow-lg'
+                        ? 'border-gray-800 shadow-md'
                         : 'border-gray-300 hover:border-gray-400'
                     }
                   `}
-                  style={{
-                    backgroundColor: color,
-                  }}
+                  style={{ backgroundColor: color }}
                   title={color}
                 >
                   {isSelected && (
                     <CheckCheck
-                      size={12}
+                      size={10}
                       color={lightColor ? '#000000' : '#ffffff'}
                       className="drop-shadow-sm"
                     />
@@ -151,35 +124,26 @@ const ColorSelector = ({
             <button
               type="button"
               onClick={() => setshowColorPicker(!showColorPicker)}
-              className="w-8 h-8 rounded-full border-2 border-dashed border-gray-400
+              className="w-6 h-6 rounded-full border-2 border-dashed border-gray-400
                          flex items-center justify-center hover:border-gray-600
-                         hover:bg-gray-50 transition-all duration-200 ease-in-out
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                         hover:bg-gray-50 transition-all duration-200 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1"
               title="Add custom color"
             >
-              <Plus size={12} color="gray" />
+              <Plus size={10} color="gray" />
             </button>
 
             {showColorPicker && (
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-1 items-center mt-1">
                 <input
                   type="color"
                   value={newColor}
                   onChange={(e) => setnewColor(e.target.value)}
-                  className="w-8 h-8 rounded-full border-2 border-gray-300 cursor-pointer
-                           appearance-none bg-transparent focus:outline-none focus:ring-2
-                           focus:ring-blue-500 focus:ring-offset-2"
-                  style={{
-                    WebkitAppearance: 'none',
-                    MozAppearance: 'none',
-                  }}
+                  className="w-6 h-6 rounded-full border-2 border-gray-300 cursor-pointer appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1"
+                  style={{ WebkitAppearance: 'none', MozAppearance: 'none' }}
                 />
                 <button
                   type="button"
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white
-                           rounded-md text-xs transition-colors duration-200
-                           flex items-center gap-1 focus:outline-none focus:ring-2
-                           focus:ring-blue-500 focus:ring-offset-2"
+                  className="px-2 py-0.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs flex items-center gap-1 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1"
                   onClick={() => {
                     if (newColor && !customeColor.includes(newColor)) {
                       const updatedColors = [...customeColor, newColor];
@@ -190,13 +154,11 @@ const ColorSelector = ({
                     setnewColor('#000000');
                   }}
                 >
-                  Add <Plus size={10} />
+                  Add <Plus size={8} />
                 </button>
                 <button
                   type="button"
-                  className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white
-                           rounded-full text-xs transition-colors duration-200
-                           focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                  className="px-2 py-0.5 bg-gray-500 hover:bg-gray-600 text-white rounded text-xs focus:outline-none focus:ring-1 focus:ring-gray-500 focus:ring-offset-1"
                   onClick={() => {
                     setshowColorPicker(false);
                     setnewColor('#000000');
@@ -209,7 +171,12 @@ const ColorSelector = ({
           </div>
         )}
       />
-      {/* Error display if needed */}
+
+      {error.name && (
+        <p className="text-[11px] font-poppins text-red-500 mt-1">
+          {String(error.name.message)}
+        </p>
+      )}
     </div>
   );
 };

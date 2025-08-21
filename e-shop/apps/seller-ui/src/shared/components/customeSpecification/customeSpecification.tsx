@@ -105,6 +105,7 @@ const CustomSpecification: React.FC<CustomSpecificationProps> = ({
                         />
                       )}
                     />
+
                     {errors?.custom_specification?.[index]?.value && (
                       <p className="text-red-400 text-[10px] mt-1">
                         {errors.custom_specification[index].value.message}
