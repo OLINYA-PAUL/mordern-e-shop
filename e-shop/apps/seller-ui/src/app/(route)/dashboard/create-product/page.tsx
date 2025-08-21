@@ -209,7 +209,6 @@ const CreateProduct = () => {
                   {...register('tags', {
                     required: 'Value is required',
                   })}
-                  required
                 />
                 {errors.tags && (
                   <p className="text-[11px] font-poppins text-red-500 mt-1">
@@ -288,7 +287,11 @@ const CreateProduct = () => {
                 <ColorSelector control={control} name="" />
               </div>
               <div className="w- mt-5">
-                <CustomSpecification control={control} errors={errors} />
+                <CustomSpecification
+                  control={control}
+                  errors={errors}
+                  register={register}
+                />
               </div>
             </div>
           </div>

@@ -14,7 +14,7 @@ const ProductInput = forwardRef<
   return (
     <div>
       {label && (
-        <label className="text-xs text-slate-300 font-poppins">{label}</label>
+        <label className="text-xs text-slate-300 font-poppins mb-2">{label}</label>
       )}
       {type === 'textarea' ? (
         <textarea
