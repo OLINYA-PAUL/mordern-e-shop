@@ -1,4 +1,4 @@
-import { Pickaxe, Plus } from 'lucide-react';
+import { CheckCheck, Plus } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { Controller, Control } from 'react-hook-form';
 
@@ -98,6 +98,12 @@ const ColorSelector = ({
               const isSelected = value.includes(color);
               const lightColor = isLightColor(color);
 
+              console.log({
+                'Color:': color,
+                'Is Selected:': isSelected,
+                'Light Color:': lightColor,
+              });
+
               return (
                 <button
                   type="button"
@@ -109,6 +115,12 @@ const ColorSelector = ({
                         ? currentValue.filter((c: string) => c !== color)
                         : [...currentValue, color]
                     );
+
+                    console.log({
+                      'Updated Value:': isSelected,
+                      currentValue: currentValue,
+                      'New Value:': isSelected,
+                    });
                   }}
                   className={`
                     w-8 h-8 rounded-full border-2 transition-all duration-200 ease-in-out
@@ -126,7 +138,7 @@ const ColorSelector = ({
                   title={color}
                 >
                   {isSelected && (
-                    <Pickaxe
+                    <CheckCheck
                       size={12}
                       color={lightColor ? '#000000' : '#ffffff'}
                       className="drop-shadow-sm"
@@ -139,8 +151,8 @@ const ColorSelector = ({
             <button
               type="button"
               onClick={() => setshowColorPicker(!showColorPicker)}
-              className="w-8 h-8 rounded-full border-2 border-dashed border-gray-400 
-                         flex items-center justify-center hover:border-gray-600 
+              className="w-8 h-8 rounded-full border-2 border-dashed border-gray-400
+                         flex items-center justify-center hover:border-gray-600
                          hover:bg-gray-50 transition-all duration-200 ease-in-out
                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               title="Add custom color"
@@ -155,7 +167,7 @@ const ColorSelector = ({
                   value={newColor}
                   onChange={(e) => setnewColor(e.target.value)}
                   className="w-8 h-8 rounded-full border-2 border-gray-300 cursor-pointer
-                           appearance-none bg-transparent focus:outline-none focus:ring-2 
+                           appearance-none bg-transparent focus:outline-none focus:ring-2
                            focus:ring-blue-500 focus:ring-offset-2"
                   style={{
                     WebkitAppearance: 'none',
@@ -164,9 +176,9 @@ const ColorSelector = ({
                 />
                 <button
                   type="button"
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white 
-                           rounded-md text-xs transition-colors duration-200 
-                           flex items-center gap-1 focus:outline-none focus:ring-2 
+                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white
+                           rounded-md text-xs transition-colors duration-200
+                           flex items-center gap-1 focus:outline-none focus:ring-2
                            focus:ring-blue-500 focus:ring-offset-2"
                   onClick={() => {
                     if (newColor && !customeColor.includes(newColor)) {
@@ -182,7 +194,7 @@ const ColorSelector = ({
                 </button>
                 <button
                   type="button"
-                  className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white 
+                  className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white
                            rounded-full text-xs transition-colors duration-200
                            focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                   onClick={() => {

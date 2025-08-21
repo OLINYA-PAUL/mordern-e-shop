@@ -6,6 +6,7 @@ import ProductInput from 'apps/seller-ui/src/shared/components/ProductInput/page
 import { ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import CustomSpecification from 'apps/seller-ui/src/shared/components/customeSpecification/customeSpecification';
 
 const CreateProduct = () => {
   const handleCreateProduct = (data: any) => {
@@ -285,6 +286,9 @@ const CreateProduct = () => {
               </div>
               <div className="w- mt-5">
                 <ColorSelector control={control} name="" />
+              </div>
+              <div className="w- mt-5">
+                <CustomSpecification control={control} errors={errors} />
               </div>
             </div>
           </div>
