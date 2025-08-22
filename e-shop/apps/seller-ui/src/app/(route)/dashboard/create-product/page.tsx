@@ -7,6 +7,7 @@ import { ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CustomSpecification from 'apps/seller-ui/src/shared/components/customeSpecification/customeSpecification';
+import CustomProperty from 'apps/seller-ui/src/shared/components/CustomProperty/CustomProperty';
 
 const CreateProduct = () => {
   const handleCreateProduct = (data: any) => {
@@ -232,32 +233,32 @@ const CreateProduct = () => {
                   </p>
                 )}
               </div>
-              <div className="w-full  mt-2">
+              <div className="w-full mt-2">
                 <ProductInput
-                  label={'Product Sloug *'}
-                  type={'text'}
-                  className="mt-2  !bg-slate-800 text-white  rounded-md"
-                  placeholder="eneter product slug"
+                  label="Product Slug *"
+                  type="text"
+                  className="mt-2 !bg-slate-800 text-white rounded-md text-xs"
+                  placeholder="enter product slug"
                   {...register('slug', {
-                    required: 'Value is required',
-                    pattern: {
-                      value: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-                      message: 'Slug must be lowercase and hyphen-separated',
-                    },
+                    required: 'Slug is required',
                     maxLength: {
                       value: 50,
                       message: 'Slug must be less than 50 characters',
                     },
-                    validate: (value) => {
-                      const words = value.split('-');
-                      return (
-                        words.length <= 5 ||
-                        'Slug must not exceed 5 hyphen-separated words'
-                      );
-                    },
                     minLength: {
                       value: 3,
                       message: 'Slug must be at least 3 characters long',
+                    },
+                    pattern: {
+                      value: /^[a-z0-9]+(-[a-z0-9]+)+$/, // must have at least one hyphen
+                      message:
+                        'Slug must be lowercase, hyphen-separated, and have at least two words',
+                    },
+                    validate: (value: string) => {
+                      const words = value.split('-');
+                      if (words.length > 5)
+                        return 'Slug must not exceed 5 words';
+                      return true;
                     },
                   })}
                 />
@@ -267,6 +268,7 @@ const CreateProduct = () => {
                   </p>
                 )}
               </div>
+
               <div className="w-full mt-2">
                 <ProductInput
                   label={'Brand *'}
@@ -288,6 +290,13 @@ const CreateProduct = () => {
               </div>
               <div className="w- mt-5">
                 <CustomSpecification
+                  control={control}
+                  errors={errors}
+                  register={register}
+                />
+              </div>
+              <div className="w- mt-5">
+                <CustomProperty
                   control={control}
                   errors={errors}
                   register={register}
