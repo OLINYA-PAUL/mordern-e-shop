@@ -302,6 +302,34 @@ const CreateProduct = () => {
                   register={register}
                 />
               </div>
+              <div className="w-full mt-2">
+                <label className="text-xs font-poppins text-slate-300">
+                  Cash On Delivery <span className="text-red-500">*</span>
+                </label>
+
+                <div className="w-full mt-1">
+                  <select
+                    {...register('cash_on_delivery', {
+                      required: 'Cash deleivery is required',
+                    })}
+                    defaultValue="Yes"
+                    className="w-full bg-slate-800 cursor-pointer text-white text-xs font-poppins px-2 py-1.5 rounded-md border border-slate-600 focus:outline-none focus:ring-1  transition-colors"
+                  >
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                  {errors.cash_on_delivery && (
+                    <p className="text-[11px] font-poppins text-red-500 mt-1">
+                      {String(errors.cash_on_delivery.message)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="w-full sm:w-2/4">
+              <label className="text-xs font-poppins text-slate-300">
+                Category <span className="">*</span>
+              </label>
             </div>
           </div>
         </div>

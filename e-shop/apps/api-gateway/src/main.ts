@@ -9,6 +9,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import proxy from 'express-http-proxy';
 import { rateLimit } from 'express-rate-limit';
+import {initialSiteConfig} from "./libs/initialSiteConfig"
 
 const app = express();
 
@@ -52,7 +53,13 @@ app.use(
 );
 
 const port = process.env.PORT || 8080;
-const server = app.listen(port, () => {
-  console.log(`Listening at http://localhost:${port}/api`);
+const server = app.listen(port, async () => {
+    console.log(`Listening at http://localhost:${port}/api`);
+ try{
+
+  await initialSiteConfig()
+ }catch(error){
+  console.log(error)
+ }
 });
 server.on('error', console.error);

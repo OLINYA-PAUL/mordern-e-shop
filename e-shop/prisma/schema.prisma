@@ -151,3 +151,9 @@ model shopReviews {
   user      users    @relation(fields: [userId], references: [id])
   shop      Shops    @relation(fields: [shopId], references: [id])
 }
+
+model site_Configs {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  categories    String[]
+  subCategories Json
+}
