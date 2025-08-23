@@ -40,7 +40,7 @@ const CustomProperty: React.FC<CustomSpecificationProps> = ({
               render={({ field }) => {
                 useEffect(() => {
                   field.onChange(properties);
-                }, [properties, field]);
+                }, [properties]);
 
                 const addProperties = () => {
                   if (!newLabel.trim()) return;
@@ -107,28 +107,32 @@ const CustomProperty: React.FC<CustomSpecificationProps> = ({
                               </button>
                             </div>
                             <div className="flex items-center gap-2 mt-2">
-                              <ProductInput
-                                label="Add Value"
-                                type="text"
-                                value={newValue}
-                                onChange={(e) => {
-                                  setNewValue(e.target.value);
-                                }}
-                                placeholder="Enter property value"
-                                className="w-full !bg-slate-800 text-white rounded-md text-xs"
-                              />
-
-                              <button
-                                type="button"
-                                onClick={() => addValue(index)}
-                                className="flex items-center justify-center sm:justify-start gap-1 text-blue-400 hover:text-blue-300 font-medium text-xs transition-colors duration-200 py-1 px-2 rounded-md hover:bg-blue-500/10 border border-blue-500/20 hover:border-blue-500/40"
-                              >
-                                <PlusCircleIcon
-                                  size={14}
-                                  className="flex-shrink-0"
+                              <div className="w-auto">
+                                <ProductInput
+                                  label="Add Value"
+                                  type="text"
+                                  value={newValue}
+                                  onChange={(e) => {
+                                    setNewValue(e.target.value);
+                                  }}
+                                  placeholder="Enter property value"
+                                  className="w-full !bg-slate-800 text-white rounded-md text-xs"
                                 />
-                                <span>Add value</span>
-                              </button>
+                              </div>
+
+                              <div className="w-auto mt-6">
+                                <button
+                                  type="button"
+                                  onClick={() => addValue(index)}
+                                  className="flex items-center justify-center sm:justify-start gap-1 text-blue-400 hover:text-blue-300 font-medium text-xs transition-colors duration-200 py-1 px-2 rounded-md hover:bg-blue-500/10 border border-blue-500/20 hover:border-blue-500/40"
+                                >
+                                  <PlusCircleIcon
+                                    size={14}
+                                    className="flex-shrink-0"
+                                  />
+                                  <span>Add</span>
+                                </button>
+                              </div>
                             </div>
 
                             <div className="flex flex-wrap gap-2 mt-2">
@@ -173,7 +177,7 @@ const CustomProperty: React.FC<CustomSpecificationProps> = ({
                       />
                       <button
                         type="button"
-                        onClick={addProperties} // ✅ FIX: Call the function
+                        onClick={addProperties}
                         className="flex items-center justify-center sm:justify-start gap-1 text-blue-400 hover:text-blue-300 font-medium text-xs transition-colors duration-200 py-1 px-2 rounded-md hover:bg-blue-500/10 border border-blue-500/20 hover:border-blue-500/40"
                       >
                         <PlusCircleIcon size={14} className="flex-shrink-0" />

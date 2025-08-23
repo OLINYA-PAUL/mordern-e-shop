@@ -1,0 +1,28 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    // "resolveJsonModule": true,
+    "outDir": "out-tsc/auth-service",
+    "types": [
+      "node", "express"
+    ],
+    "rootDir": "../../",
+    "tsBuildInfoFile": "out-tsc/auth-service.app.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../packages/**/*.ts",
+    "swagger-output.json",
+    "src/swagger.js",
+    "src",
+    "src/**/*.json"
+],
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "jest.config.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts"
+  ] 
+}
