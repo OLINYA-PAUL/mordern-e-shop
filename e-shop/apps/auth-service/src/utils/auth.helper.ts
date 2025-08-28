@@ -4,7 +4,7 @@ import { redis } from './redis';
 import { sendEmail } from '../lib/nodeMailer';
 import { ValidationError } from '../../../../packages/error-handler/appError';
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-import prisma from '../lib/prisma';
+import prisma from '../../../../packages/prisma';
 import bcrypt from 'bcrypt';
 
 // export const validateRegistrationData = (
