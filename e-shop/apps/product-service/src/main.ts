@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { validationError } from '../../../packages/error-handler/errorMiddleware';
 import swaggerUi from 'swagger-ui-express';
+import router from "./routes/product.routes"
 import fs from 'fs';
 import path from 'path';
 
@@ -40,7 +41,7 @@ app.get('/docs-json', (req: Request, res: Response) => {
   res.send(swaggerDocument);
 });
 
-
+app.use("/api", router)
 app.use(validationError);
 
 // ✅ Start server
