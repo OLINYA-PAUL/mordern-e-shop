@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import prisma from '../../apps/auth-service/src/lib/prisma/index';
+import prisma from '../prisma/index';
 
 export const isAuthenticated = async (
   req: Request,
@@ -63,7 +63,7 @@ export const isAuthenticated = async (
 
 export const authorizeRoles = (...allowedRoles: ('user' | 'seller')[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
-    if (!allowedRoles.includes(req.role as any)) {
+    if (!allowedRoles.includes(req?.role as any)) {
       return next(new Error('Forbidden: Access denied'));
     }
     next();

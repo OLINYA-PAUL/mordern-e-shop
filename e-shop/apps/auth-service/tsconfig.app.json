@@ -16,7 +16,10 @@
     "swagger-output.json",
     "src/swagger.js",
     "src",
-    "src/**/*.json"
+    "src/**/*.json",
+    "src/**/*.ts",
+    "../../types/**/*.d.ts"
+, "../../packages/prisma", "../../packages/types"
 ],
   "exclude": [
     "out-tsc",

@@ -11,8 +11,8 @@ if (process.env.STRIPE_SECRET_KEY!) {
   stripe = new Stripe(process.env.STRIPE_SECRET_KEY! as string, {
     apiVersion: '2025-06-30.basil',
   });
-  console.log({ 'env stripe details': process.env.STRIPE_SECRET_KEY! });
-  console.log({ stripeDetails: stripe });
+  // console.log({ 'env stripe details': process.env.STRIPE_SECRET_KEY! });
+  // console.log({ stripeDetails: stripe });
 }
 import {
   validateRegistrationData,
@@ -24,7 +24,7 @@ import {
   handleResetPassword,
   handleVerifyForgetPasswordOtp,
 } from '../../utils/auth.helper';
-import prisma from '../../lib/prisma';
+import prisma from '../../../../../packages/prisma';
 import { accessToken, refressToken } from '../../utils/jwt';
 import { setCookies } from '../../utils/jwt/cookies';
 import bcrypt from 'bcrypt';

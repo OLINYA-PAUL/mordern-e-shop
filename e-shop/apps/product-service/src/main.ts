@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { validationError } from '../../../packages/error-handler/errorMiddleware';
-// import authrouter from './routes/user.routes';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
@@ -41,13 +40,13 @@ app.get('/docs-json', (req: Request, res: Response) => {
   res.send(swaggerDocument);
 });
 
-// app.use('/api/v1', authrouter);
+
 app.use(validationError);
 
 // ✅ Start server
 const server = app.listen(port, () => {
-  console.log(`✅ Auth service running at http://localhost:${port}/api`);
-  console.log(`📘 Swagger Docs at http://localhost:${port}/swagger-api-docs`);
+  console.log(`✅ Product service running at http://localhost:${port}/api`);
+  console.log(`📘 Product Swagger Docs at http://localhost:${port}/swagger-api-docs`);
 });
 
 server.on('error', (error) => {
