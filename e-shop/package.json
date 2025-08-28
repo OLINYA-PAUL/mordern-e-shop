@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "swagger:auth": "node apps/auth-service/src/swagger.js",
+    "auth:docs": "node apps/auth-service/src/swagger.js",
+    "product:docs": "node apps/product-service/src/swagger.js",
     "dev": "npx nx run-many --target=serve --all ",
     "build": "npx nx run-many --target=build --all ",
     "test": "npx nx run-many --target=test --all ",

@@ -44,7 +44,7 @@ const SidebarWrapper = () => {
         css={{
           height: '100vh',
           zIndex: 220,
-          position: 'sticky',
+          position: 'fixed',
           padding: '8px',
           top: 0,
           overflowY: 'auto',
