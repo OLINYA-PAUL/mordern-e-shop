@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { getProductCategories } from '../controller/product.controller';
 
-const router: Router = Router();
+const productRouter: Router = Router();
 
-router.get('/get-product-categories', getProductCategories);
+productRouter.get('/get-product-categories', getProductCategories);
 
-export default router;
+export default productRouter;

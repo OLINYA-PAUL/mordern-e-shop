@@ -8,6 +8,9 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import CustomSpecification from 'apps/seller-ui/src/shared/components/customeSpecification/customeSpecification';
 import CustomProperty from 'apps/seller-ui/src/shared/components/CustomProperty/CustomProperty';
+import { useQuery } from '@tanstack/react-query';
+import { categories } from 'apps/seller-ui/src/utils/categories/categories';
+import { axiosInstance } from 'apps/seller-ui/src/configs/axios';
 
 const CreateProduct = () => {
   const handleCreateProduct = (data: any) => {
@@ -17,6 +20,7 @@ const CreateProduct = () => {
   const {
     handleSubmit,
     register,
+    watch,
     setValue,
     control,
     formState: { errors },
@@ -83,9 +87,42 @@ const CreateProduct = () => {
     setValue('images', updatedImages);
   };
 
+  // const [categoriesData, setcategoriesData] = useState<
+  //   'categories' | 'subcategories' | any
+  // >({});
+
   const countWords = (str: string) => {
     return str.trim().split(/\s+/).length;
   };
+
+  const { data, error, isSuccess, isPending } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const res = await axiosInstance.get('/get-product-categories');
+      return res.data;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    retry: 3,
+  });
+
+  const categoriesData = data?.categories ?? [];
+  const subCategoriesData = data?.subCategories ?? [];
+
+  console.log('Categories data <====>', {
+    categoriesData,
+    subCategoriesData,
+  });
+
+  const selectedCategory = watch('categories');
+  const regularProce = watch('regular_price');
+
+  // useEffect(() => {
+  //   if (categoriesData === 'categories' && categoriesDatas.length > 0)
+  //     setcategoriesData(categoriesDatas);
+  //   else setcategoriesData(subCategoriesDatas);
+  // }, [categoriesData, subCategoriesDatas, categoriesDatas]);
 
   return (
     <form

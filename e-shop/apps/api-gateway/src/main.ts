@@ -38,22 +38,22 @@ const limiter = rateLimit({
 // Apply rate limiter before proxy routes
 app.use(limiter);
 
+
+// Proxy all requests to the actual service
 app.get('/gateway-health', (req, res) => {
   res.send({ message: 'Welcome to api-gateway!' });
 });
-
-// Proxy all requests to the actual service
 // app.use("/", proxy("http://localhost:6001/api/v1"));
 
 app.use(
   '/',
-  proxy('http://localhost:6001', {
+  proxy('http://localhost:6002', {
     proxyReqPathResolver: (req) => req.originalUrl,
   })
 );
 app.use(
-  '/products',
-  proxy('http://localhost:6002', {
+  '/',
+  proxy('http://localhost:6001', {
     proxyReqPathResolver: (req) => req.originalUrl,
   })
 );
