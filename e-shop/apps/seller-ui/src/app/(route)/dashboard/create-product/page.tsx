@@ -98,7 +98,7 @@ const CreateProduct = () => {
   const { data, error, isSuccess, isPending } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const res = await axiosInstance.get('/get-product-categories');
+      const res = await axiosInstance.get('/products/get-product-categories');
       return res.data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
