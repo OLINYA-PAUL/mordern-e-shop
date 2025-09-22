@@ -5,12 +5,13 @@ import ImagePlaceHolders from 'apps/seller-ui/src/shared/components/image-placeh
 import ProductInput from 'apps/seller-ui/src/shared/components/ProductInput/page';
 import { ChevronRightIcon } from 'lucide-react';
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import CustomSpecification from 'apps/seller-ui/src/shared/components/customeSpecification/customeSpecification';
 import CustomProperty from 'apps/seller-ui/src/shared/components/CustomProperty/CustomProperty';
 import { useQuery } from '@tanstack/react-query';
 import { categories } from 'apps/seller-ui/src/utils/categories/categories';
 import { axiosInstance } from 'apps/seller-ui/src/configs/axios';
+import { fileDataDepTarget } from 'nx/src/config/project-graph';
 
 const CreateProduct = () => {
   const handleCreateProduct = (data: any) => {
@@ -95,7 +96,13 @@ const CreateProduct = () => {
     return str.trim().split(/\s+/).length;
   };
 
-  const { data, error, isSuccess, isPending } = useQuery({
+  const {
+    data,
+    error,
+    isError,
+    isSuccess,
+    isPending: categoriesLoading,
+  } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
       const res = await axiosInstance.get('/products/get-product-categories');
@@ -367,6 +374,107 @@ const CreateProduct = () => {
               <label className="text-xs font-poppins text-slate-300">
                 Category <span className="">*</span>
               </label>
+              <div className="w-full mt-3">
+                {categoriesLoading ? (
+                  <>Loading...</>
+                ) : isError ? (
+                  <>
+                    <div className="w-full text-red-500 text-xs mt-3">
+                      {error?.message && String(error?.message)}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Controller
+                      name={`categories -  ${categoriesData.map(
+                        (x: any, id: string) => x.toString()
+                      )}`}
+                      control={control}
+                      rules={{ required: 'Category is required' }}
+                      render={({ field }) => (
+                        <select
+                          className="w-full bg-black cursor-pointer p-2 border border-gray-400 mb-4"
+                          {...field}
+                        >
+                          <option className="text-white text-xs bg-black cursor-pointer">
+                            select category{' '}
+                          </option>
+
+                          {categoriesData.map(
+                            (category: string, id: string) => (
+                              <option
+                                key={id}
+                                value={category}
+                                className=" text-white text-xs cursor-pointer overflow-y-auto bg-black"
+                                onChange={() => field.onChange}
+                              >
+                                {category}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      )}
+                    />
+                    {errors.categories && (
+                      <p className="text-[11px] font-poppins text-red-500 mt-1">
+                        {String(errors.categories.message)}
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
+              <label className="text-xs font-poppins text-slate-300 mt-5">
+                Sub categories <span className="">*</span>
+              </label>
+              <div className="w-full mt-3">
+                {categoriesLoading ? (
+                  <>Loading...</>
+                ) : isError ? (
+                  <>
+                    <div className="w-full text-red-500 text-xs mt-3">
+                      {error?.message && String(error?.message)}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Controller
+                      name={`sub categories -  ${categoriesData.map(
+                        (x: any, id: string) => x.toString()
+                      )}`}
+                      control={control}
+                      rules={{ required: 'Category is required' }}
+                      render={({ field }) => (
+                        <select
+                          className="w-full bg-black cursor-pointer p-2 border border-gray-400"
+                          {...field}
+                        >
+                          <option className="text-white text-xs bg-black cursor-pointer ">
+                            select sub category{' '}
+                          </option>
+
+                          {subCategoriesData.map(
+                            (category: string, id: string) => (
+                              <option
+                                key={id}
+                                value={category}
+                                className=" text-white text-xs cursor-pointer overflow-y-auto bg-black"
+                                onChange={() => field.onChange}
+                              >
+                                {category}
+                              </option>
+                            )
+                          )}
+                        </select>
+                      )}
+                    />
+                    {errors.sub_categories && (
+                      <p className="text-[11px] font-poppins text-red-500 mt-1">
+                        {String(errors.sub_categories.message)}
+                      </p>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </div>
