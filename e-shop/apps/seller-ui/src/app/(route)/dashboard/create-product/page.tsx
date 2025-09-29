@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import { axiosInstance } from 'apps/seller-ui/src/configs/axios';
 import RichTextEditor from 'apps/seller-ui/src/shared/components/richTextEditors';
 import { useRouter } from 'next/navigation';
+import SizeSlector from 'packages/components/SizeSlector';
 
 const CreateProduct = () => {
   const handleCreateProduct = (data: any) => {
@@ -606,6 +607,9 @@ const CreateProduct = () => {
                       {errors.Stock_Quantity.message as string}
                     </p>
                   )}
+                </div>
+                <div className="mt-5">
+                  <SizeSlector control={control} error={error} />
                 </div>
               </div>
             </div>
