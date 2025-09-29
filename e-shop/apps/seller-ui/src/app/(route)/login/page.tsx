@@ -68,7 +68,7 @@ const Login = () => {
   });
 
   return (
-    <div className="w-full mx-auto bg-[#fcfcf3]  p-6 min-h-screen ">
+    <div className="w-full mx-auto bg-[#fcfcf3]  p-6 min-h-screen flex items-center justify-center flex-col flex-1">
       <div className="text-xl font-roboto font-semibold text-black text-center">
         Login To Your Account
       </div>

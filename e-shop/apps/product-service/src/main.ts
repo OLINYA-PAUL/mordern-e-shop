@@ -3,7 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { validationError } from '../../../packages/error-handler/errorMiddleware';
 import swaggerUi from 'swagger-ui-express';
-import router from "./routes/product.routes"
+import productRouter from "./routes/product.routes"
 import fs from 'fs';
 import path from 'path';
 
@@ -30,7 +30,8 @@ app.use(
 
 app.use(express.json({ limit: '100mb' }));
 app.use(cookieParser());
-const port = process.env.PORT ? Number(process.env.PORT) : 6002;
+const port =  6002;
+// const port = process.env.PORT ? Number(process.env.PORT) : 6002;
 
 app.get('/', (req, res) => {
   res.send({ message: 'Hello API' });
@@ -41,7 +42,7 @@ app.get('/docs-json', (req: Request, res: Response) => {
   res.send(swaggerDocument);
 });
 
-app.use("/api", router)
+app.use('/api/v1', productRouter)
 app.use(validationError);
 
 // ✅ Start server
