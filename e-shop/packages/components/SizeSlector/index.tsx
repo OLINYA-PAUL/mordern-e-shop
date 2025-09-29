@@ -1,7 +1,7 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
 
-const SizeSlector = ({ control, error }: { control: any; error: any }) => {
+const SizeSlector = ({ control, errors }: { control: any; errors: any }) => {
   const size = ['S', 'M', 'L', 'XL', 'XXL', '3XL'];
 
   return (
@@ -42,6 +42,11 @@ const SizeSlector = ({ control, error }: { control: any; error: any }) => {
           );
         }}
       />
+      {errors.size && (
+        <p className="text-red-500 text-xs mt-1">
+          {errors.size.message as string}
+        </p>
+      )}
     </div>
   );
 };

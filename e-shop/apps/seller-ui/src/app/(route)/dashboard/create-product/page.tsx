@@ -609,7 +609,7 @@ const CreateProduct = () => {
                   )}
                 </div>
                 <div className="mt-5">
-                  <SizeSlector control={control} error={error} />
+                  <SizeSlector control={control} errors={error} />
                 </div>
               </div>
             </div>
