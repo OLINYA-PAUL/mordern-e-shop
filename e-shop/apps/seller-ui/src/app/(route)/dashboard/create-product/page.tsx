@@ -4,14 +4,14 @@ import ColorSelector from 'apps/seller-ui/src/shared/components/ColorSelector/Co
 import ImagePlaceHolders from 'apps/seller-ui/src/shared/components/image-placeholders/page';
 import ProductInput from 'apps/seller-ui/src/shared/components/ProductInput/page';
 import { ChevronRightIcon } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import CustomSpecification from 'apps/seller-ui/src/shared/components/customeSpecification/customeSpecification';
 import CustomProperty from 'apps/seller-ui/src/shared/components/CustomProperty/CustomProperty';
 import { useQuery } from '@tanstack/react-query';
-import { categories } from 'apps/seller-ui/src/utils/categories/categories';
 import { axiosInstance } from 'apps/seller-ui/src/configs/axios';
-import { fileDataDepTarget } from 'nx/src/config/project-graph';
+import RichTextEditor from 'apps/seller-ui/src/shared/components/richTextEditors';
+import { useRouter } from 'next/navigation';
 
 const CreateProduct = () => {
   const handleCreateProduct = (data: any) => {
@@ -88,9 +88,7 @@ const CreateProduct = () => {
     setValue('images', updatedImages);
   };
 
-  // const [categoriesData, setcategoriesData] = useState<
-  //   'categories' | 'subcategories' | any
-  // >({});
+  const navigate = useRouter();
 
   const countWords = (str: string) => {
     return str.trim().split(/\s+/).length;
@@ -117,19 +115,12 @@ const CreateProduct = () => {
   const categoriesData = data?.categories ?? [];
   const subCategoriesData = data?.subCategories ?? [];
 
-  console.log('Categories data <====>', {
-    categoriesData,
-    subCategoriesData,
-  });
-
   const selectedCategory = watch('categories');
-  const regularProce = watch('regular_price');
+  const regularPrice = watch('regular_price');
 
-  // useEffect(() => {
-  //   if (categoriesData === 'categories' && categoriesDatas.length > 0)
-  //     setcategoriesData(categoriesDatas);
-  //   else setcategoriesData(subCategoriesDatas);
-  // }, [categoriesData, subCategoriesDatas, categoriesDatas]);
+  const subCategories = useMemo(() => {
+    return selectedCategory ? subCategoriesData?.[selectedCategory] || [] : [];
+  }, [selectedCategory, subCategoriesData]);
 
   return (
     <form
@@ -141,7 +132,12 @@ const CreateProduct = () => {
       </h2>
 
       <div className="flex items-center">
-        <span className="text-xs text-slate-300 cursor-pointer">Dashboard</span>
+        <span
+          className="text-xs text-slate-300 cursor-pointer"
+          onClick={() => navigate.push('/dashboard')}
+        >
+          Dashboard
+        </span>
         <ChevronRightIcon className="opacity-70 cursor-pointer" size={15} />
         <span className="text-xs text-slate-300 cursor-pointer">
           Create Product
@@ -149,7 +145,7 @@ const CreateProduct = () => {
       </div>
 
       {/* ✅ Responsive Wrapper */}
-      <div className="flex flex-col md:flex-row gap-10 py-4 w-full">
+      <div className="flex flex-col md:flex-row gap-4 py-4 w-full">
         {/* Left Section */}
         <div className="md:w-[35%] w-full rounded-md h-auto">
           {images.length > 0 && (
@@ -386,14 +382,12 @@ const CreateProduct = () => {
                 ) : (
                   <>
                     <Controller
-                      name={`categories -  ${categoriesData.map(
-                        (x: any, id: string) => x.toString()
-                      )}`}
+                      name={`categories`}
                       control={control}
                       rules={{ required: 'Category is required' }}
                       render={({ field }) => (
                         <select
-                          className="w-full bg-black cursor-pointer p-2 border border-gray-400 mb-4"
+                          className="w-full bg-black cursor-pointer p-1 border border-gray-400 mb-4"
                           {...field}
                         >
                           <option className="text-white text-xs bg-black cursor-pointer">
@@ -438,22 +432,22 @@ const CreateProduct = () => {
                 ) : (
                   <>
                     <Controller
-                      name={`sub categories -  ${categoriesData.map(
-                        (x: any, id: string) => x.toString()
-                      )}`}
+                      name={`sub_categories`}
                       control={control}
                       rules={{ required: 'Category is required' }}
                       render={({ field }) => (
                         <select
-                          className="w-full bg-black cursor-pointer p-2 border border-gray-400"
+                          className="w-full bg-black cursor-pointer p-1 border border-gray-400"
                           {...field}
                         >
                           <option className="text-white text-xs bg-black cursor-pointer ">
                             select sub category{' '}
                           </option>
 
-                          {subCategoriesData.map(
-                            (category: string, id: string) => (
+                          {subCategories.map((category: string, id: number) => {
+                            console.log('am i getting Sub category', category);
+
+                            return (
                               <option
                                 key={id}
                                 value={category}
@@ -462,8 +456,8 @@ const CreateProduct = () => {
                               >
                                 {category}
                               </option>
-                            )
-                          )}
+                            );
+                          })}
                         </select>
                       )}
                     />
@@ -474,6 +468,145 @@ const CreateProduct = () => {
                     )}
                   </>
                 )}
+              </div>
+              <div className="mt-4">
+                <label className=" text-slate-300  font-poppins text-sm">
+                  Detailed Descriptions *(Min 100 words)
+                </label>
+                <Controller
+                  control={control}
+                  name="deatils_description"
+                  rules={{
+                    required: 'please enters a description',
+                    validate: (value: string) => {
+                      const words = value
+                        .split(/\s+/)
+                        .filter((word: string) => word).length;
+                      return (
+                        words >= 100 || 'Description must be at least 100 words'
+                      );
+                    },
+                  }}
+                  key={'details description'}
+                  render={({ field }) => (
+                    <RichTextEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+
+                {errors.deatils_description && (
+                  <p className="text-[11px] font-poppins text-red-500 mt-1">
+                    {String(errors.deatils_description.message)}
+                  </p>
+                )}
+
+                <div className="w-full mt-2">
+                  <ProductInput
+                    label="Video URL *"
+                    type="text"
+                    className="mt-2 !bg-slate-800 text-white rounded-sm text-xs"
+                    placeholder="https://www.youtube.com/embed/xyz123"
+                    {...register('slug', {
+                      required: 'URL is required',
+                      pattern: {
+                        value:
+                          /^https:\/\/(www\.)?youtube\.com\/embed\/[a-zA-Z0-9_-]+$/,
+                        message:
+                          'Invalid YouTube embed URL! Use format: https://www.youtube.com/embed/VIDEO_ID',
+                      },
+                    })}
+                  />
+                  {errors.slug && (
+                    <p className="text-[11px] font-poppins text-red-500 mt-1">
+                      {String(errors.slug.message)}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-2">
+                  <ProductInput
+                    label="Regular Price"
+                    type="text"
+                    className="mt-2 !bg-slate-800 text-white rounded-sm text-xs"
+                    placeholder="$20"
+                    {...register('regular_price', {
+                      valueAsNumber: true,
+                      min: { value: 1, message: 'Price must be at least 1' },
+                      validate: (value) =>
+                        !isNaN(value) || 'Only numbers are allowed',
+                    })}
+                  />
+                  {errors.regular_price && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.regular_price.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-2">
+                  <ProductInput
+                    label="Sales Price"
+                    type="text"
+                    className="mt-2 !bg-slate-800 text-white rounded-sm text-xs"
+                    placeholder="$10"
+                    {...register('Sales_price', {
+                      valueAsNumber: true,
+                      min: { value: 1, message: 'Price must be at least 1' },
+                      validate: (value: number) => {
+                        if (isNaN(value)) {
+                          return 'Only numbers are allowed';
+                        }
+
+                        if (regularPrice && value > regularPrice) {
+                          return 'Sale price must be less than regular price';
+                        }
+
+                        return true;
+                      },
+                    })}
+                  />
+                  {errors.Sales_Price && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.Sales_Price.message as string}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-2">
+                  <ProductInput
+                    label="Stock Quantity *"
+                    type="text"
+                    className="mt-2 !bg-slate-800 text-white rounded-sm text-xs"
+                    placeholder="1000"
+                    {...register('Stock_Quantity', {
+                      valueAsNumber: true,
+                      min: {
+                        value: 1,
+                        message: 'Stock Quantity must be at least 1',
+                      },
+                      max: {
+                        value: 1000,
+                        message: 'Stock Quantity can not exceed 1000',
+                      },
+                      validate: (value: number) => {
+                        if (isNaN(value)) {
+                          return 'Only numbers are allowed';
+                        }
+                        if (!Number.isInteger(value)) {
+                          return 'Stock quantity must be a whole number';
+                        }
+                        return true;
+                      },
+                    })}
+                  />
+                  {errors.Stock_Quantity && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.Stock_Quantity.message as string}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
           </div>
