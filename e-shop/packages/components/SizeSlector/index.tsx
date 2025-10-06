@@ -1,12 +1,12 @@
 import React from 'react';
 import { Controller } from 'react-hook-form';
 
-const SizeSlector = ({ control, error }: { control: any; error: any }) => {
+const SizeSlector = ({ control, errors }: { control: any; errors: any }) => {
   const size = ['S', 'M', 'L', 'XL', 'XXL', '3XL'];
 
   return (
     <div className="w-ful">
-      <label className="font-poppins text-slate-300 ">
+      <label className="font-poppins text-slate-300 text-xs">
         Select Product Size
       </label>
       <Controller
@@ -38,6 +38,11 @@ const SizeSlector = ({ control, error }: { control: any; error: any }) => {
                   </button>
                 );
               })}
+              {/* {errors.Size && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.Size.message as string}
+                </p>
+              )} */}
             </div>
           );
         }}

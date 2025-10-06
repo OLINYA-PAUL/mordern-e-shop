@@ -33,7 +33,10 @@
     "../../apps/seller-ui/.next/types/**/*.ts",
     "../../dist/apps/seller-ui/.next/types/**/*.ts",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+      "src",
+    "../../packages/components"
+
   ],
   "exclude": [
     "node_modules",
