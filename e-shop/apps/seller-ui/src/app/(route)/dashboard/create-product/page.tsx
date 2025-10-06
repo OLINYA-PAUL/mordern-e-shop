@@ -19,6 +19,11 @@ const CreateProduct = () => {
     console.log('Product created:', data);
   };
 
+  const handleSveDraft = (data: any) => {};
+
+  const [isChange, setIsChange] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     handleSubmit,
     register,
@@ -610,12 +615,36 @@ const CreateProduct = () => {
                 </div>
                 <div className="mt-5">
                   <SizeSlector control={control} errors={error} />
+
+                  <div className="w-full mt-2">
+                    <label className="font-poppins text-slate-300 text-xs ">
+                      Select Discount Code (Optional)
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      {isChange && (
+        <div className="w-full my-4 flex justify-end gap-4 p-2">
+          <button
+            type="button"
+            onClick={handleSveDraft}
+            className="bg-slate-800 outline-none border-none text-sm text-center py-2 px-4 rounded-[5px]"
+          >
+            Save Draft
+          </button>
+          <button
+            type="submit"
+            onClick={handleSveDraft}
+            className="bg-blue-900 outline-none border-none text-sm text-center py-2 px-4 rounded-[5px]"
+          >
+            {isLoading ? 'Creating...' : 'Create Product'}
+          </button>
+        </div>
+      )}
     </form>
   );
 };

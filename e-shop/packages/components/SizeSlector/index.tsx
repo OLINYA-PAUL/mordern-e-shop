@@ -6,7 +6,7 @@ const SizeSlector = ({ control, errors }: { control: any; errors: any }) => {
 
   return (
     <div className="w-ful">
-      <label className="font-poppins text-slate-300 ">
+      <label className="font-poppins text-slate-300 text-xs">
         Select Product Size
       </label>
       <Controller
@@ -38,15 +38,15 @@ const SizeSlector = ({ control, errors }: { control: any; errors: any }) => {
                   </button>
                 );
               })}
+              {/* {errors.Size && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.Size.message as string}
+                </p>
+              )} */}
             </div>
           );
         }}
       />
-      {errors.size && (
-        <p className="text-red-500 text-xs mt-1">
-          {errors.size.message as string}
-        </p>
-      )}
     </div>
   );
 };

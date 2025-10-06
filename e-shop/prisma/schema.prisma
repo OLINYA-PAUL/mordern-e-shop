@@ -96,6 +96,7 @@ model sellers {
   bank_code      String?
   account_number String?
   bank_name      String?
+  // discount_codes discount_codes[]
 }
 
 model Shops {
@@ -156,4 +157,15 @@ model site_Configs {
   id            String   @id @default(auto()) @map("_id") @db.ObjectId
   categories    String[]
   subCategories Json
+}
+
+model discount_codes {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  discountCode  String   @unique
+  public_name   String?
+  discountType  String
+  discountValue Float
+  sellerId      String   @db.ObjectId
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

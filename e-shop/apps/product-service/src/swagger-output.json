@@ -23,6 +23,84 @@
           }
         }
       }
+    },
+    "/create-discount-codes": {
+      "post": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "discountCode": {
+                  "example": "any"
+                },
+                "public_name": {
+                  "example": "any"
+                },
+                "discountType": {
+                  "example": "any"
+                },
+                "discountValue": {
+                  "example": "any"
+                },
+                "sellerId": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      }
+    },
+    "/get-discount-codes": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/delete-discount-codes": {
+      "delete": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/{get-product-categories{where{id}}": {
+      "delete": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
     }
   }
 }
