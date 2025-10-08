@@ -4,6 +4,7 @@ import {
   deleteDiscountCodes,
   getDisCountCodes,
   getProductCategories,
+  editDiscountCodes,
 } from '../controller/product.controller';
 import {
   authorizeRoles,
@@ -36,6 +37,13 @@ productRouter.delete(
   isAuthenticated,
   authorizeRoles('seller'),
   deleteDiscountCodes
+);
+
+productRouter.put(
+  '/edit-discount-codes/:id',
+  isAuthenticated,
+  authorizeRoles('seller'),
+  editDiscountCodes
 );
 
 export default productRouter;

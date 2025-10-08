@@ -36,9 +36,7 @@ interface DiscountCode {
   public_name: string;
   discountType: string;
   discountValue: number;
-  usageLimit: number;
-  sellerId: string;
-  usedCount: number;
+  sellerId?: string;
 }
 
 export const createDiscountCode = async (
@@ -177,6 +175,70 @@ export const deleteDiscountCodes = async (
     });
   } catch (error) {
     console.error('Error Deleting discount code:', (error as Error).message);
+    next(error);
+  }
+};
+
+export const editDiscountCodes = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { discountCode, public_name, discountType, discountValue } =
+      req.body as DiscountCode;
+    const { id } = req.params;
+    const sellerId = req.user.id;
+
+    if (!discountCode || !public_name || !discountType || !discountValue) {
+      res.status(400).json({ message: 'Missing required fields' });
+      return;
+    }
+
+    if (!id) {
+      res
+        .status(400)
+        .json({ success: false, message: 'Please provide discount code Id' });
+      return;
+    }
+
+    const discountCodes = await prisma.discount_codes.findUnique({
+      where: { id },
+      select: { id: true, sellerId: true },
+    });
+
+    if (!discountCodes) {
+      res.status(404).json({
+        success: false,
+        message: 'Discount code not found',
+      });
+      return;
+    }
+
+    if (discountCodes.sellerId !== sellerId) {
+      res.status(403).json({
+        success: false,
+        message: 'You are not authorized to perform this operation',
+      });
+      return;
+    }
+
+    await prisma.discount_codes.update({
+      where: { id },
+      data: {
+        discountCode,
+        discountType,
+        discountValue: Number(discountValue),
+        public_name,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Discount code updated successfully',
+    });
+  } catch (error) {
+    console.error('Error updating discount code:', (error as Error).message);
     next(error);
   }
 };
