@@ -34,7 +34,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "discountCode": {
+                "discountCodes": {
                   "example": "any"
                 },
                 "public_name": {
@@ -116,7 +116,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "discountCode": {
+                "discountCodes": {
                   "example": "any"
                 },
                 "public_name": {

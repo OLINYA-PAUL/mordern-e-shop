@@ -1,32 +1,128 @@
 'use client';
-import {
-  QueryClient,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { axiosInstance } from 'apps/seller-ui/src/configs/axios';
-import styles from 'apps/seller-ui/src/styles/styles';
 import { ChevronRightIcon, Edit2, Loader, Plus, Trash, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
-import { MdCancel } from 'react-icons/md';
+
+const DeleteDiscountCode = ({
+  id,
+  setIsDeleteDiscountCodeModel,
+  publicName,
+}: {
+  id: string;
+  publicName: string;
+  setIsDeleteDiscountCodeModel: React.Dispatch<React.SetStateAction<boolean>>;
+}) => {
+  console.log('onclick', setIsDeleteDiscountCodeModel);
+  const queryClient = useQueryClient();
+  const handleDeleteDiscountCode = async (id: string) => {
+    setDeleteLoading((prev) => ({
+      ...prev,
+      [id]: true,
+    }));
+    deleteDiscountCodeMutation.mutate(id);
+  };
+  const [deleteLoading, setDeleteLoading] = useState<{
+    [key: string]: boolean;
+  }>({});
+
+  const deleteDiscountCodeMutation = useMutation({
+    mutationKey: ['shop-discount-codes'],
+    mutationFn: async (id: any) =>
+      await axiosInstance.delete(`/products/delete-discount-codes/${id}`),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['shop-discount-codes'] });
+      setIsDeleteDiscountCodeModel(false);
+      return toast.success(
+        data?.data?.message || 'Discount code Deleted successfully'
+      );
+    },
+    onError: (error: any) => {
+      console.error('Error creating discount code:', error);
+      return toast.error(
+        error?.response?.data?.message || 'Failed to Delete discount code'
+      );
+    },
+  });
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+      <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-2xl">
+        {/* Header */}
+        <div className="relative flex items-center justify-center px-4 py-3 border-b border-slate-700">
+          <h3 className="text-sm font-semibold text-white text-center">
+            Are you sure you want to delete this item?
+          </h3>
+          <button
+            onClick={() => setIsDeleteDiscountCodeModel(false)}
+            className="absolute right-4 text-slate-400 hover:text-white transition-colors"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-5 py-5 text-center">
+          <p className="text-slate-300 text-xs mb-4">
+            You are about to delete the discount{' '}
+            <span className="font-bold text-white text-[15px] font-poppins">
+              {publicName}
+            </span>
+            {'  '}?. <br />
+            This action cannot be undone. Please confirm your decision.
+          </p>
+
+          {/* Buttons */}
+          <div className="flex justify-center gap-3">
+            <button
+              type="button"
+              onClick={() => setIsDeleteDiscountCodeModel(false)}
+              className="w-1/2 py-2 text-xs text-slate-300 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              disabled={deleteLoading[id]}
+              className="w-1/2 py-2 text-xs text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              onClick={() => handleDeleteDiscountCode(id)}
+            >
+              {deleteLoading[id] ? (
+                <Loader color="white" size={15} />
+              ) : (
+                <>
+                  <Trash size={12} className="mr-2" />
+                  Delete
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const DiscountCodes = () => {
   const [isModelShown, setIsModelShown] = useState<boolean>(false);
   const [isEditModelShown, setIsEditModelShown] = useState(false);
+  const [isDeleteDiscountCodeModel, setIsDeleteDiscountCodeModel] =
+    useState<boolean>(false);
   const navigate = useRouter();
   const {
     reset,
     watch,
     handleSubmit,
+    control,
     register,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      discountCode: '',
+      discountCodes: '',
       public_name: '',
       discountType: 'Percentage',
       discountValue: '',
@@ -50,21 +146,12 @@ const DiscountCodes = () => {
     retry: 3,
   });
 
-  const [deleteLoading, setDeleteLoading] = useState<{
-    [key: string]: boolean;
-  }>({});
+  console.log('discountCodes :<===>', discountCodes);
   const [editLoading, setEditLoading] = useState<{
     [key: string]: boolean;
   }>({});
 
   const queryClient = useQueryClient();
-  const handleDeleteDiscountCode = async (id: string) => {
-    setDeleteLoading((prev) => ({
-      ...prev,
-      [id]: true,
-    }));
-    deleteDiscountCodeMutation.mutate(id);
-  };
 
   const [id, setEditId] = useState<string>('');
 
@@ -75,7 +162,7 @@ const DiscountCodes = () => {
     setEditId(id);
 
     reset({
-      discountCode: selected.discountCode || '',
+      discountCodes: selected.discountCodes || '',
       public_name: selected.public_name || '',
       discountType: selected.discountType || 'Percentage',
       discountValue: selected.discountValue || '',
@@ -139,25 +226,6 @@ const DiscountCodes = () => {
     },
   });
 
-  const deleteDiscountCodeMutation = useMutation({
-    mutationKey: ['shop-discount-codes'],
-    mutationFn: async (id: any) =>
-      await axiosInstance.delete(`/products/delete-discount-codes/${id}`),
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['shop-discount-codes'] });
-      setIsModelShown(false);
-      return toast.success(
-        data?.data?.message || 'Discount code Deleted successfully'
-      );
-    },
-    onError: (error: any) => {
-      console.error('Error creating discount code:', error);
-      return toast.error(
-        error?.response?.data?.message || 'Failed to Delete discount code'
-      );
-    },
-  });
-
   const editDiscountCodeMutation = useMutation({
     mutationKey: ['shop-discount-codes'],
     mutationFn: async ({ id, data }: { id: string; data: any }) =>
@@ -200,7 +268,7 @@ const DiscountCodes = () => {
           className="text-xs outline-none border-none py-1 px-2 rounded-md bg-blue-950 hover:bg-blue-900 transition duration-300  flex items-center justify-center gap-2 "
           onClick={() => {
             reset({
-              discountCode: '',
+              discountCodes: '',
               public_name: '',
               discountType: 'Percentage',
               discountValue: '',
@@ -260,7 +328,7 @@ const DiscountCodes = () => {
                         {discount.public_name}
                       </td>
                       <td className="p-3 text-xs text-slate-200 w-[20%]">
-                        {discount.discountType === 'percentage'
+                        {discount.discountType === 'Percentage'
                           ? 'Percentage (%)'
                           : 'Flat Rate ($)'}
                       </td>
@@ -270,33 +338,32 @@ const DiscountCodes = () => {
                           : `$${discount.discountValue}`}
                       </td>
                       <td className="p-3 text-xs text-slate-200 w-[20%]">
-                        {discount.discountCode}
+                        {discount.discountCodes}
                       </td>
                       <td className="p-3 w-[15%]">
                         <button
                           type="button"
-                          onClick={() => handleDeleteDiscountCode(discount.id)}
-                          disabled={
-                            deleteDiscountCodeMutation.isPending ||
-                            deleteLoading[discount.id]
-                          }
+                          onClick={() => setIsDeleteDiscountCodeModel(true)}
                           className="bg-red-600 p-2 rounded-md hover:bg-red-700 transition duration-300"
                         >
-                          {deleteLoading[discount.id] ? (
-                            <Loader color="white" size={15} />
-                          ) : (
-                            <Trash size={10} color="white" />
-                          )}
+                          <Trash size={10} color="white" />
                         </button>
+
+                        {isDeleteDiscountCodeModel && discount.id && (
+                          <DeleteDiscountCode
+                            id={discount.id}
+                            setIsDeleteDiscountCodeModel={
+                              setIsDeleteDiscountCodeModel
+                            }
+                            publicName={discount.public_name}
+                          />
+                        )}
                       </td>
+
                       <td className="p-3 w-[15%]">
                         <button
                           type="button"
                           onClick={() => getEditDiscountCodeId(discount.id)}
-                          disabled={
-                            editDiscountCodeMutation.isPending ||
-                            editLoading[discount.id]
-                          }
                           className="bg-blue-600 p-2 rounded-md hover:bg-blue-700 transition duration-300"
                         >
                           <Edit2 size={10} color="white" />
@@ -367,23 +434,7 @@ const DiscountCodes = () => {
               <div>
                 <input
                   type="text"
-                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-2 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
-                  placeholder="Discount Code"
-                  {...register('discountCode', {
-                    required: 'Discount code is required',
-                  })}
-                />
-                {errors.discountCode && (
-                  <p className="text-[10px] text-red-400 mt-1">
-                    {String(errors.discountCode.message)}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <input
-                  type="text"
-                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-2 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-1 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
                   placeholder="Public Name"
                   {...register('public_name', {
                     required: 'Public name is required',
@@ -395,15 +446,27 @@ const DiscountCodes = () => {
                   </p>
                 )}
               </div>
-
               <div>
-                <input
-                  type="text"
-                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-2 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
-                  placeholder="Discount Type (e.g. percentage)"
-                  {...register('discountType', {
-                    required: 'Discount type is required',
-                  })}
+                <label htmlFor="discountType" className="text-xs">
+                  Select Discount Type
+                </label>
+                <Controller
+                  name="discountType"
+                  control={control}
+                  key={'discountType'}
+                  render={({ field }) => {
+                    return (
+                      <>
+                        <select
+                          className="w-full mt-2 bg-slate-800 border border-slate-700 rounded text-xs px-3 py-1 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
+                          {...field}
+                        >
+                          <option value={'Percentage'}>Percentage (%)</option>
+                          <option value={'Flat Rate'}>Flat Rate ($)</option>
+                        </select>
+                      </>
+                    );
+                  }}
                 />
                 {errors.discountType && (
                   <p className="text-[10px] text-red-400 mt-1">
@@ -411,11 +474,10 @@ const DiscountCodes = () => {
                   </p>
                 )}
               </div>
-
               <div>
                 <input
                   type="text"
-                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-2 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-1 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
                   placeholder="Discount Value"
                   {...register('discountValue', {
                     required: 'Discount value is required',
@@ -428,6 +490,21 @@ const DiscountCodes = () => {
                 {errors.discountValue && (
                   <p className="text-[10px] text-red-400 mt-1">
                     {String(errors.discountValue.message)}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="text"
+                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-1 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
+                  placeholder="Discount Code"
+                  {...register('discountCodes', {
+                    required: 'Discount code is required',
+                  })}
+                />
+                {errors.discountCodes && (
+                  <p className="text-[10px] text-red-400 mt-1">
+                    {String(errors.discountCodes.message)}
                   </p>
                 )}
               </div>
@@ -480,23 +557,7 @@ const DiscountCodes = () => {
               <div>
                 <input
                   type="text"
-                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-2 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
-                  placeholder="Discount Code"
-                  {...register('discountCode', {
-                    required: 'Discount code is required',
-                  })}
-                />
-                {errors.discountCode && (
-                  <p className="text-[10px] text-red-400 mt-1">
-                    {String(errors.discountCode.message)}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <input
-                  type="text"
-                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-2 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-1 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
                   placeholder="Public Name"
                   {...register('public_name', {
                     required: 'Public name is required',
@@ -508,15 +569,27 @@ const DiscountCodes = () => {
                   </p>
                 )}
               </div>
-
               <div>
-                <input
-                  type="text"
-                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-2 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
-                  placeholder="Discount Type (e.g. percentage)"
-                  {...register('discountType', {
-                    required: 'Discount type is required',
-                  })}
+                <label htmlFor="discountType" className="text-xs">
+                  Select Discount Type
+                </label>
+                <Controller
+                  name="discountType"
+                  control={control}
+                  key={'discountType'}
+                  render={({ field }) => {
+                    return (
+                      <>
+                        <select
+                          className="w-full mt-2 bg-slate-800 border border-slate-700 rounded text-xs px-3 py-1 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
+                          {...field}
+                        >
+                          <option value={'Percentage'}>Percentage (%)</option>
+                          <option value={'Flat Rate'}>Flat Rate ($)</option>
+                        </select>
+                      </>
+                    );
+                  }}
                 />
                 {errors.discountType && (
                   <p className="text-[10px] text-red-400 mt-1">
@@ -524,11 +597,10 @@ const DiscountCodes = () => {
                   </p>
                 )}
               </div>
-
               <div>
                 <input
                   type="text"
-                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-2 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
+                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-1 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
                   placeholder="Discount Value"
                   {...register('discountValue', {
                     required: 'Discount value is required',
@@ -541,6 +613,21 @@ const DiscountCodes = () => {
                 {errors.discountValue && (
                   <p className="text-[10px] text-red-400 mt-1">
                     {String(errors.discountValue.message)}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  type="text"
+                  className="w-full bg-slate-800 border border-slate-700 rounded text-xs px-3 py-1 text-white placeholder-slate-500 outline-none focus:border-slate-600 transition-colors"
+                  placeholder="Discount Code"
+                  {...register('discountCodes', {
+                    required: 'Discount code is required',
+                  })}
+                />
+                {errors.discountCodes && (
+                  <p className="text-[10px] text-red-400 mt-1">
+                    {String(errors.discountCodes.message)}
                   </p>
                 )}
               </div>

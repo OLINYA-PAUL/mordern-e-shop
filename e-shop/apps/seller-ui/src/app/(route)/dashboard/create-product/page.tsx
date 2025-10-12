@@ -56,6 +56,22 @@ const CreateProduct = () => {
     { width: 5000, height: 5000 },
   ];
 
+  const {
+    data: discountCodes,
+    error: discountCodeError,
+    isLoading: discountCodeLoading,
+  } = useQuery({
+    queryKey: ['shop-discount-codes'],
+    queryFn: async () => {
+      const res = await axiosInstance.get('/products/get-discount-codes');
+      return res?.data?.discountCodes;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    retry: 3,
+  });
+
   const [openImageModel, setOpenImageModel] = useState<boolean>(false);
   const [images, setImages] = useState<(File | null)[]>([null]);
   const [selectedSize, setSelectedSize] = useState<string>(
@@ -620,6 +636,45 @@ const CreateProduct = () => {
                     <label className="font-poppins text-slate-300 text-xs ">
                       Select Discount Code (Optional)
                     </label>
+
+                    {discountCodeLoading ? (
+                      <div className="flex flex-col items-center justify-center py-10 text-center">
+                        {/* Spinner */}
+                        <div className="w-6 h-6 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin mb-3"></div>
+
+                        {/* Text */}
+                        <h2 className="text-sm font-medium text-slate-400">
+                          Loading discount codes...
+                        </h2>
+                      </div>
+                    ) : (
+                      <>
+                        {discountCodes?.map((code: any) => (
+                          <button
+                            key={code.id}
+                            type="button"
+                            className={`px-3 py-1 rounded-md text-sm font-semibold border ${
+                              watch('discountCodes')?.includes(code.id)
+                                ? 'bg-blue-600 text-white border-blue-600'
+                                : 'bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700'
+                            }`}
+                            onClick={() => {
+                              const currentSelection =
+                                watch('discountCodes') || [];
+                              const updatedSelection =
+                                currentSelection?.includes(code.id)
+                                  ? currentSelection.filter(
+                                      (id: string) => id !== code.id
+                                    )
+                                  : [...currentSelection, code.id];
+                              setValue('discountCodes', updatedSelection);
+                            }}
+                          >
+                            {code.name}
+                          </button>
+                        ))}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

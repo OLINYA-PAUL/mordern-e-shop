@@ -32,7 +32,7 @@ export const getProductCategories = async (
 };
 
 interface DiscountCode {
-  discountCode: string;
+  discountCodes: string;
   public_name: string;
   discountType: string;
   discountValue: number;
@@ -45,12 +45,17 @@ export const createDiscountCode = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { discountCode, public_name, discountType, discountValue, sellerId } =
-      req.body as DiscountCode;
+    const {
+      discountCodes,
+      public_name,
+      discountType,
+      discountValue,
+      sellerId,
+    } = req.body as DiscountCode;
 
     // ✅ Validate required fields
     if (
-      !discountCode ||
+      !discountCodes ||
       !public_name ||
       !discountType ||
       !discountValue ||
@@ -67,17 +72,17 @@ export const createDiscountCode = async (
       return;
     }
 
-    // ✅ Validate code length before DB query
-    if (discountCode.length < 10 || discountCode.length > 10) {
-      res.status(400).json({
-        message: "Discount code can't be lower or exceeds 10 characters",
-      });
-      return;
-    }
+    // // ✅ Validate code length before DB query
+    // if (discountCode.length < 10 || discountCode.length > 10) {
+    //   res.status(400).json({
+    //     message: "Discount code can't be lower or exceeds 10 characters",
+    //   });
+    //   return;
+    // }
 
     // ✅ Check if discount code already exists
     const existingCode = await prisma.discount_codes.findUnique({
-      where: { discountCode },
+      where: { discountCodes },
     });
 
     if (existingCode) {
@@ -89,7 +94,7 @@ export const createDiscountCode = async (
     const newDiscountCode = await prisma.discount_codes.create({
       //@ts-ignore
       data: {
-        discountCode,
+        discountCodes,
         public_name,
         discountType,
         discountValue: Number(discountValue),
@@ -99,7 +104,7 @@ export const createDiscountCode = async (
 
     res.status(201).json({
       message: 'Discount code created successfully',
-      discountCode: newDiscountCode,
+      discountCodes: newDiscountCode,
     });
   } catch (error) {
     console.error('Error creating discount code:', (error as Error).message);
@@ -185,12 +190,12 @@ export const editDiscountCodes = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { discountCode, public_name, discountType, discountValue } =
+    const { discountCodes, public_name, discountType, discountValue } =
       req.body as DiscountCode;
     const { id } = req.params;
     const sellerId = req.user.id;
 
-    if (!discountCode || !public_name || !discountType || !discountValue) {
+    if (!discountCodes || !public_name || !discountType || !discountValue) {
       res.status(400).json({ message: 'Missing required fields' });
       return;
     }
@@ -202,12 +207,12 @@ export const editDiscountCodes = async (
       return;
     }
 
-    const discountCodes = await prisma.discount_codes.findUnique({
+    const discountCode = await prisma.discount_codes.findUnique({
       where: { id },
       select: { id: true, sellerId: true },
     });
 
-    if (!discountCodes) {
+    if (!discountCode) {
       res.status(404).json({
         success: false,
         message: 'Discount code not found',
@@ -215,7 +220,7 @@ export const editDiscountCodes = async (
       return;
     }
 
-    if (discountCodes.sellerId !== sellerId) {
+    if (discountCode.sellerId !== sellerId) {
       res.status(403).json({
         success: false,
         message: 'You are not authorized to perform this operation',
@@ -226,7 +231,7 @@ export const editDiscountCodes = async (
     await prisma.discount_codes.update({
       where: { id },
       data: {
-        discountCode,
+        discountCodes,
         discountType,
         discountValue: Number(discountValue),
         public_name,
