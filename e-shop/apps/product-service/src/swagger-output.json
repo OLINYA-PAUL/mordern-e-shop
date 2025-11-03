@@ -148,6 +148,16 @@
         }
       }
     },
+    "/upload-image": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/{get-product-categories{where{id}}": {
       "delete": {
         "description": "",

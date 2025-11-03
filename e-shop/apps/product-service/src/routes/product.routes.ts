@@ -5,6 +5,7 @@ import {
   getDisCountCodes,
   getProductCategories,
   editDiscountCodes,
+  uploadProductImage,
 } from '../controller/product.controller';
 import {
   authorizeRoles,
@@ -44,6 +45,13 @@ productRouter.put(
   isAuthenticated,
   authorizeRoles('seller'),
   editDiscountCodes
+);
+
+productRouter.post(
+  '/upload-image',
+  isAuthenticated,
+  authorizeRoles('seller'),
+  uploadProductImage
 );
 
 export default productRouter;

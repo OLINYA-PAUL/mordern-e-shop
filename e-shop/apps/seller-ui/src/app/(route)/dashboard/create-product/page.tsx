@@ -13,7 +13,7 @@ import { axiosInstance } from 'apps/seller-ui/src/configs/axios';
 import RichTextEditor from 'apps/seller-ui/src/shared/components/richTextEditors';
 import { useRouter } from 'next/navigation';
 import SizeSlector from 'packages/components/SizeSlector';
-
+import toast from 'react-hot-toast';
 const CreateProduct = () => {
   const handleCreateProduct = (data: any) => {
     console.log('Product created:', data);
@@ -23,6 +23,9 @@ const CreateProduct = () => {
 
   const [isChange, setIsChange] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   const {
     handleSubmit,
@@ -55,44 +58,84 @@ const CreateProduct = () => {
   });
 
   const [openImageModel, setOpenImageModel] = useState<boolean>(false);
+
   const [selectedSize, setSelectedSize] = useState<string>(
     `${productImageSizes[0].width}x${productImageSizes[0].height}`
   );
 
-  const onFileChange = (file: File, index: number) => {
-    const updatedImages = [...images];
-    updatedImages[index] = file;
+  const [filId, setFileId] = useState<string>('');
+  function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
 
-    if (index === images.length - 1 && images.length < 8) {
-      updatedImages.push(null);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  }
+
+  const onFileChange = async (file: File, index: number) => {
+    if (!file) return;
+
+    setImageLoading((pre) => ({ ...pre, [filId]: true }));
+
+    const files = await fileToBase64(file);
+    console.log('this is file data from frontend', { files });
+    try {
+      const res = await axiosInstance.post('/products/upload-image', { files });
+
+      const updatedImages = [...images];
+      updatedImages[index] = res.data.file_url;
+
+      if (index === images.length - 1 && images.length < 8) {
+        updatedImages.push(null);
+      }
+      setImageLoading((prev) => ({ ...prev, [filId]: false }));
+      setFileId(res.data.file_id);
+      setImages(updatedImages);
+      setValue(
+        'images',
+        updatedImages.filter((img) => img !== null)
+      );
+      toast.success(res.data.message || 'Image uploaded successfully');
+      setOpenImageModel(false);
+    } catch (error) {
+      console.log('Error uploading image:', (error as Error).message);
     }
-
-    setImages(updatedImages);
-    setValue(
-      'images',
-      updatedImages.filter((img) => img !== null)
-    );
-    setOpenImageModel(false);
   };
 
   const [images, setImages] = useState<(File | null)[]>([null]);
 
-  const onFileRemove = (index: number) => {
-    if (index < 0 || index >= images.length) return;
+  const onFileRemove = async (index: number) => {
+    try {
+      if (index < 0 || index >= images.length) return;
 
-    let updatedImages = [...images];
-    updatedImages.splice(index, 1);
+      let updatedImages = [...images];
 
-    const hasNullPlaceholder = updatedImages.some((img) => img === null);
-    if (!hasNullPlaceholder) {
-      updatedImages.push(null);
+      const imageToDelete = updatedImages[index];
+
+      if (imageToDelete && typeof imageToDelete === 'string') {
+        const res = await axiosInstance.delete(
+          '/products/upload-image',
+          imageToDelete
+        );
+      }
+
+      updatedImages.splice(index, 1);
+
+      const hasNullPlaceholder = updatedImages.some((img) => img === null);
+      if (!hasNullPlaceholder) {
+        updatedImages.push(null);
+      }
+
+      setImages(updatedImages);
+      setValue(
+        'images',
+        updatedImages.filter((img) => img !== null)
+      );
+    } catch (error: any) {
+      console.log(error.message);
     }
-
-    setImages(updatedImages);
-    setValue(
-      'images',
-      updatedImages.filter((img) => img !== null)
-    );
   };
 
   const navigate = useRouter();
@@ -166,6 +209,7 @@ const CreateProduct = () => {
                 index={0}
                 setOpenImageModel={setOpenImageModel}
                 currentImage={images[0]}
+                imageLoading={filId === '' ? false : imageLoading[filId]}
               />
 
               <select
@@ -199,6 +243,7 @@ const CreateProduct = () => {
                   index={index + 1}
                   setOpenImageModel={setOpenImageModel}
                   currentImage={image}
+                  imageLoading={filId === '' ? false : imageLoading[filId]}
                 />
               ))}
             </div>
