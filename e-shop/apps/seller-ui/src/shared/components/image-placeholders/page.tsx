@@ -1,7 +1,7 @@
 'use client';
 
 import { Pencil, WandSparkles, X } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface ImagePlaceHoldersProps {
   size: string;
@@ -11,6 +11,7 @@ interface ImagePlaceHoldersProps {
   defaultImage: string | null;
   index: number;
   setOpenImageModel: (open: boolean) => void;
+  currentImage?: File | null;
 }
 
 const ImagePlaceHolders = ({
@@ -21,36 +22,61 @@ const ImagePlaceHolders = ({
   defaultImage,
   index,
   setOpenImageModel,
+  currentImage,
 }: ImagePlaceHoldersProps) => {
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
 
+  // ✅ Sync with parent or clear
+  useEffect(() => {
+    if (currentImage && currentImage instanceof File) {
+      const objectUrl = URL.createObjectURL(currentImage);
+      setImagePreview(objectUrl);
+      return () => URL.revokeObjectURL(objectUrl);
+    } else {
+      setImagePreview(null);
+    }
+  }, [currentImage]);
+
+  // ✅ Instant preview fix — show image immediately after selecting
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && onFileChange) {
-      setImagePreview(URL.createObjectURL(file));
-      onFileChange(file, index ?? 0);
+      const objectUrl = URL.createObjectURL(file);
+      setImagePreview(objectUrl); // Show preview immediately
+      onFileChange(file, index);
     }
+
+    // Reset the input value so reselecting same file triggers change event again
+    event.target.value = '';
   };
+
+  const handleRemove = () => {
+    setImagePreview(null);
+    onFileRemove(index);
+  };
+
+  const getDimensions = () => {
+    if (typeof size === 'string' && size.includes('x')) {
+      const [width, height] = size.split('x').map((s) => s.trim());
+      return { width: `${width}px`, height: `${height}px` };
+    }
+    return small ? { height: '140px' } : { height: '220px' };
+  };
+
+  const dimensions = getDimensions();
 
   return (
     <div
-      className={`relative ${
-        typeof size === 'string' ? `` : size ? 'h-[180px]' : 'h-[450px]'
-      } cursor-pointer p-2 border border-dashed border-slate-600 rounded-md bg-gray-800 backdrop-blur-sm flex flex-col justify-center items-center`}
-      style={
-        typeof size === 'string'
-          ? {
-              width: size.split('x')[0].trim() + 'px',
-              height: size.split('x')[1].trim() + 'px',
-            }
-          : {}
-      }
+      className={`w-full relative cursor-pointer p-1.5 border border-dashed border-slate-600 rounded-lg bg-gray-800/80 backdrop-blur-md flex flex-col justify-center items-center transition-all duration-300 hover:border-slate-500 ${
+        small ? 'w-full' : ''
+      }`}
+      style={dimensions}
     >
       <input
         type="file"
         className="hidden"
         accept="image/*"
-        id={`image-upload-${index ?? 0}`}
+        id={`image-upload-${index}`}
         onChange={handleImageChange}
       />
 
@@ -58,61 +84,60 @@ const ImagePlaceHolders = ({
         <>
           <button
             type="button"
-            onClick={() => {
-              onFileRemove(index);
-
-              console.log('Image removed ===>', index);
-            }}
-            className="absolute top-3 right-3 p-2 rounded bg-red-700 shadow-sm cursor-pointer"
+            onClick={handleRemove}
+            className="absolute top-1.5 right-1.5 p-1 rounded bg-red-700 hover:bg-red-600 shadow-sm cursor-pointer z-10 transition-colors"
+            title="Remove image"
           >
-            <X size={20} />
+            <X size={small ? 14 : 18} />
           </button>
 
           <button
             type="button"
             onClick={() => setOpenImageModel(true)}
-            className="absolute top-14 right-3 p-2 rounded bg-blue-700 shadow-sm cursor-pointer"
+            className="absolute top-10 right-1.5 p-1 rounded bg-blue-700 hover:bg-blue-600 shadow-sm cursor-pointer z-10 transition-colors"
+            title="Edit with AI"
           >
-            <WandSparkles size={20} />
+            <WandSparkles size={small ? 14 : 18} />
           </button>
-        </>
-      ) : (
-        <label
-          htmlFor={`image-upload-${index}`}
-          className="absolute top-3 right-3 p-2 rounded-full bg-slate-700 shadow-sm cursor-pointer"
-        >
-          <Pencil size={16} />
-        </label>
-      )}
 
-      {imagePreview ? (
-        <>
           <img
             src={imagePreview}
-            alt="preview"
-            className="w-full h-full object-cover rounded-md"
+            alt={`Product image ${index + 1}`}
+            className="w-full h-full object-cover rounded-md shadow-md"
           />
         </>
       ) : (
-        <div className="w-full flex items-center flex-col justify-center">
-          <img
-            src={
-              'https://community.softr.io/uploads/db9110/original/2X/7/74e6e7e382d0ff5d7773ca9a87e6f6f8817a68a6.jpeg'
-            }
-            alt="preview"
-            className="w-[70px] h-[70px] opacity-40 mb-5  rounded-md"
-          />
-          <p className="text-xs text-gray-400">
-            {size
-              ? 'Click to upload image'
-              : 'Click the pen icon to Upload image'}{' '}
-            {size}
-          </p>
-          <p className="text-gray-400 font-poppins text-xs text-center mt-5">
-            Please choose an image with the <br />
-            expected ration
-          </p>
-        </div>
+        <>
+          <label
+            htmlFor={`image-upload-${index}`}
+            className="absolute top-1.5 right-1.5 p-1 rounded-full bg-slate-700 hover:bg-slate-600 shadow-sm cursor-pointer z-10 transition-colors"
+            title="Upload image"
+          >
+            <Pencil size={14} />
+          </label>
+
+          <div className="w-full flex items-center flex-col justify-center px-1">
+            <img
+              src={defaultImage as string}
+              alt="Upload placeholder"
+              className={`${
+                small ? 'w-[38px] h-[38px]' : 'w-[55px] h-[55px]'
+              } opacity-40 mb-2 rounded-md`}
+            />
+            <p
+              className={`${
+                small ? 'text-[9px]' : 'text-[11px]'
+              } text-gray-400 text-center`}
+            >
+              Click to upload image
+            </p>
+            {!small && (
+              <p className="text-gray-400 font-poppins text-[9px] text-center mt-2">
+                Choose an image with ratio: {size}
+              </p>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
