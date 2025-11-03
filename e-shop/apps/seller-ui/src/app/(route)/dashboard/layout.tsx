@@ -12,13 +12,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="w-full h-full bg-black min-h-screen text-white flex gap-5 overflow-hidden font-poppins">
+    <div className="w-full h-full bg-black min-h-screen text-white flex gap-0 overflow-hidden font-poppins">
       <aside className="w-[250px] min-w-[200px] max-w-[300px]  h-screen border-r border-r-slate-900 p-4 text-white">
         <div className="sticky top-0">
           <SidebarWrapper />
         </div>
       </aside>
-      <main className="w-full flex-1 p-3">{children}</main>
+      <main className="w-full flex-1 p-0">{children}</main>
     </div>
   );
 }
