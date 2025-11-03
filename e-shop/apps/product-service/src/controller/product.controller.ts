@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import prisma from '@packages/prisma';
+import imageKit from '@packages/imageKit';
 
 export const getProductCategories = async (
   req: Request,
@@ -244,6 +245,36 @@ export const editDiscountCodes = async (
     });
   } catch (error) {
     console.error('Error updating discount code:', (error as Error).message);
+    next(error);
+  }
+};
+
+export const uploadProductImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { files } = req.body;
+    console.log('this is files data', { files });
+    if (!files) {
+      res.status(400).json({ message: 'Please upload a file' });
+      return;
+    }
+    // Upload to ImageKit
+    const upload = await imageKit.upload({
+      file: files, // Base64 string or file URL
+      fileName: `product-${Date.now()}.jpeg`,
+      folder: '/products',
+    });
+    res.status(200).json({
+      file_url: upload.url,
+      file_id: upload.fileId,
+      message: 'Uploaded successfully',
+      status: true,
+    });
+  } catch (error) {
+    console.error('Error uploading product image:', (error as Error).message);
     next(error);
   }
 };

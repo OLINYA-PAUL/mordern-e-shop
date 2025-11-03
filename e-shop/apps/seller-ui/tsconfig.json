@@ -35,7 +35,8 @@
     "next-env.d.ts",
     ".next/types/**/*.ts",
       "src",
-    "../../packages/components"
+    "../../packages/components",
+      "../../packages/imageKit/**/*"
 
   ],
   "exclude": [

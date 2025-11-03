@@ -19,7 +19,7 @@
     "src/**/*.json",
     "src/**/*.ts",
     "../../types/**/*.d.ts"
-, "../../packages/prisma", "../../packages/types"
+, "../../packages/prisma", "../../packages/types", "../../packages/imageKit"
 ],
   "exclude": [
     "out-tsc",
