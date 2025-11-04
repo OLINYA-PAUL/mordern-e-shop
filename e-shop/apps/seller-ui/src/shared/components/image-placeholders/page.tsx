@@ -13,6 +13,7 @@ interface ImagePlaceHoldersProps {
   setOpenImageModel: (open: boolean) => void;
   currentImage?: any;
   imageLoading: boolean;
+  setSelectedImageUrl: (imageUrl: string) => void;
 }
 
 const ImagePlaceHolders = ({
@@ -25,6 +26,7 @@ const ImagePlaceHolders = ({
   setOpenImageModel,
   currentImage,
   imageLoading,
+  setSelectedImageUrl,
 }: ImagePlaceHoldersProps) => {
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
 
@@ -98,7 +100,10 @@ const ImagePlaceHolders = ({
 
           <button
             type="button"
-            onClick={() => setOpenImageModel(true)}
+            onClick={() => {
+              setOpenImageModel(true);
+              setSelectedImageUrl(imagePreview || '');
+            }}
             className="absolute top-10 right-1.5 p-1 rounded bg-blue-700 hover:bg-blue-600 shadow-sm cursor-pointer z-10 transition-colors"
             title="Edit with AI"
           >

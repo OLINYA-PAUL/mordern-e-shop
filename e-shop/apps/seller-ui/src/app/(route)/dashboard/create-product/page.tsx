@@ -14,6 +14,7 @@ import RichTextEditor from 'apps/seller-ui/src/shared/components/richTextEditors
 import { useRouter } from 'next/navigation';
 import SizeSlector from 'packages/components/SizeSlector';
 import toast from 'react-hot-toast';
+import AIImageModel from 'apps/seller-ui/src/shared/components/AIImageModel';
 const CreateProduct = () => {
   const handleCreateProduct = (data: any) => {
     console.log('Product created:', data);
@@ -22,10 +23,13 @@ const CreateProduct = () => {
   const handleSveDraft = (data: any) => {};
 
   const [isChange, setIsChange] = useState(true);
+  const [openImageModel, setOpenImageModel] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState<{ [key: string]: boolean }>(
     {}
   );
+
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string>('');
 
   const {
     handleSubmit,
@@ -56,8 +60,6 @@ const CreateProduct = () => {
     refetchOnWindowFocus: true,
     retry: 3,
   });
-
-  const [openImageModel, setOpenImageModel] = useState<boolean>(false);
 
   const [selectedSize, setSelectedSize] = useState<string>(
     `${productImageSizes[0].width}x${productImageSizes[0].height}`
@@ -307,6 +309,7 @@ const CreateProduct = () => {
                 setOpenImageModel={setOpenImageModel}
                 currentImage={images[0]?.file_url || null} // ✅ Pass the URL string or null
                 imageLoading={imageLoading[0] || false}
+                setSelectedImageUrl={setSelectedImageUrl}
               />
 
               <select
@@ -341,6 +344,7 @@ const CreateProduct = () => {
                   setOpenImageModel={setOpenImageModel}
                   currentImage={image?.file_url || null} // ✅ Pass the URL string or null
                   imageLoading={imageLoading[idx + 1] || false}
+                  setSelectedImageUrl={setSelectedImageUrl}
                 />
               ))}
             </div>
@@ -830,6 +834,15 @@ const CreateProduct = () => {
           </div>
         </div>
       </div>
+
+      {openImageModel && (
+        <AIImageModel
+          isOpen={openImageModel}
+          onClose={() => setOpenImageModel(false)}
+          selectedImageUrl={selectedImageUrl}
+          setSelectedImageUrl={setSelectedImageUrl}
+        />
+      )}
 
       {isChange && (
         <div className="w-full my-4 flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 p-2">

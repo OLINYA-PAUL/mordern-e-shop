@@ -176,7 +176,7 @@
       }
     },
     "/delete-image-file": {
-      "post": {
+      "delete": {
         "description": "",
         "parameters": [
           {
