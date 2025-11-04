@@ -68,7 +68,6 @@ const CreateProduct = () => {
     file_id: string;
   }
 
-  const [filId, setFileId] = useState<string>('');
   function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -124,40 +123,117 @@ const CreateProduct = () => {
 
   const [images, setImages] = useState<(UploadedFile | null)[]>([null]);
 
+  // const onFileRemove = async (index: number) => {
+  //   // Set loading for THIS specific index
+  //   try {
+  //     if (index < 0 || index >= images.length) return;
+  //     setImageLoading((prev) => ({ ...prev, [index]: true }));
+
+  //     const updatedImages = [...images];
+  //     const imageToDelete = updatedImages[index];
+
+  //     const file_id = imageToDelete?.file_id || '';
+
+  //     if (imageToDelete && typeof imageToDelete === 'object') {
+  //       const res = await axiosInstance.delete(`/products/delete-image-file`, {
+  //         data: { file_id },
+  //       });
+  //       console.log('Delete response:', res.data, index);
+  //       toast.success(res.data.message || 'Image deleted successfully');
+  //     }
+
+  //     updatedImages.splice(index, 1);
+
+  //     // Ensure there's always at least one null placeholder
+  //     if (
+  //       updatedImages.length === 0 ||
+  //       !updatedImages.some((img) => img === null)
+  //     ) {
+  //       updatedImages.push(null);
+  //     }
+
+  //     setImages(updatedImages);
+  //     setValue(
+  //       'images',
+  //       updatedImages.filter((img) => img !== null)
+  //     );
+  //   } catch (error: any) {
+  //     console.log((error as Error).message);
+  //     toast.error(error.message || 'Failed to delete image');
+  //   } finally {
+  //     setImageLoading((prev) => ({ ...prev, [index]: false }));
+  //   }
+  // };
+
+  // ...existing code...
   const onFileRemove = async (index: number) => {
+    // mark loading for this index immediately
+    setImageLoading((prev) => ({ ...prev, [index]: true }));
+
+    let updatedImagesLocal: (UploadedFile | null)[] = [];
+
     try {
-      if (index < 0 || index >= images.length) return;
+      // update images using functional updater to avoid stale state
+      setImages((prev) => {
+        const updated = [...prev];
 
-      const updatedImages = [...images];
-      const imageToDelete = updatedImages[index];
+        if (index < 0 || index >= updated.length) {
+          // ensure we still clear loading in finally
+          updatedImagesLocal = updated;
+          return updated;
+        }
 
-      if (imageToDelete && typeof imageToDelete === 'object') {
-        const res = await axiosInstance.delete('/products/delete-image-file', {
-          data: { file_id: imageToDelete.file_id },
+        const imageToDelete = updated[index];
+        const file_id =
+          imageToDelete && typeof imageToDelete === 'object'
+            ? imageToDelete.file_id
+            : '';
+
+        // attempt server delete only if there's a file id
+        if (file_id) {
+          // perform API call outside of state updater (we'll call after)
+        }
+
+        // remove the item
+        updated.splice(index, 1);
+
+        // ensure at least one null placeholder
+        if (updated.length === 0 || !updated.some((img) => img === null)) {
+          updated.push(null);
+        }
+
+        updatedImagesLocal = updated;
+        return updated;
+      });
+
+      // if there was a file id, delete from server
+      const imageAtIndex = images[index]; // read current state to get file_id if present
+      const file_id =
+        imageAtIndex && typeof imageAtIndex === 'object'
+          ? imageAtIndex.file_id
+          : '';
+
+      if (file_id) {
+        const res = await axiosInstance.delete(`/products/delete-image-file`, {
+          data: { file_id },
         });
+        console.log('Delete response:', res.data, index);
         toast.success(res.data.message || 'Image deleted successfully');
       }
 
-      updatedImages.splice(index, 1);
-
-      // Ensure there's always at least one null placeholder
-      if (
-        updatedImages.length === 0 ||
-        !updatedImages.some((img) => img === null)
-      ) {
-        updatedImages.push(null);
-      }
-
-      setImages(updatedImages);
+      // update form value with the actual updated images
       setValue(
         'images',
-        updatedImages.filter((img) => img !== null)
+        updatedImagesLocal.filter((img) => img !== null)
       );
-    } catch (error) {
+    } catch (error: any) {
       console.log((error as Error).message);
-      toast.error('Failed to delete image');
+      toast.error(error.message || 'Failed to delete image');
+    } finally {
+      setImageLoading((prev) => ({ ...prev, [index]: false }));
     }
   };
+  // ...existing code...
 
   const navigate = useRouter();
 
