@@ -55,7 +55,7 @@ productRouter.post(
   uploadProductImage
 );
 
-productRouter.post(
+productRouter.delete(
   '/delete-image-file',
   isAuthenticated,
   authorizeRoles('seller'),
