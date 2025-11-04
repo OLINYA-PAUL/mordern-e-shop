@@ -63,6 +63,11 @@ const CreateProduct = () => {
     `${productImageSizes[0].width}x${productImageSizes[0].height}`
   );
 
+  interface UploadedFile {
+    file_url: string;
+    file_id: string;
+  }
+
   const [filId, setFileId] = useState<string>('');
   function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -77,54 +82,69 @@ const CreateProduct = () => {
   const onFileChange = async (file: File, index: number) => {
     if (!file) return;
 
-    setImageLoading((pre) => ({ ...pre, [filId]: true }));
+    // Set loading for THIS specific index
+    setImageLoading((prev) => ({ ...prev, [index]: true }));
 
     const files = await fileToBase64(file);
-    console.log('this is file data from frontend', { files });
+
     try {
-      const res = await axiosInstance.post('/products/upload-image', { files });
+      const res = await axiosInstance.post('/products/upload-image', {
+        files,
+      });
 
       const updatedImages = [...images];
-      updatedImages[index] = res.data.file_url;
+      const uploadedImage = {
+        file_url: res.data.file_url,
+        file_id: res.data.file_id,
+      };
 
+      updatedImages[index] = uploadedImage;
+
+      // Add a new placeholder if we're at the last position and haven't reached the limit
       if (index === images.length - 1 && images.length < 8) {
         updatedImages.push(null);
       }
-      setImageLoading((prev) => ({ ...prev, [filId]: false }));
-      setFileId(res.data.file_id);
+
       setImages(updatedImages);
+      console.log('Updated images:', updatedImages);
+
       setValue(
         'images',
         updatedImages.filter((img) => img !== null)
       );
+
       toast.success(res.data.message || 'Image uploaded successfully');
-      setOpenImageModel(false);
     } catch (error) {
       console.log('Error uploading image:', (error as Error).message);
+      toast.error('Failed to upload image');
+    } finally {
+      setImageLoading((prev) => ({ ...prev, [index]: false }));
     }
   };
 
-  const [images, setImages] = useState<(File | null)[]>([null]);
+  const [images, setImages] = useState<(UploadedFile | null)[]>([null]);
 
   const onFileRemove = async (index: number) => {
     try {
       if (index < 0 || index >= images.length) return;
 
-      let updatedImages = [...images];
-
+      const updatedImages = [...images];
       const imageToDelete = updatedImages[index];
 
-      if (imageToDelete && typeof imageToDelete === 'string') {
-        const res = await axiosInstance.delete(
-          '/products/upload-image',
-          imageToDelete
-        );
+      if (imageToDelete && typeof imageToDelete === 'object') {
+        const res = await axiosInstance.delete('/products/delete-image-file', {
+          data: { file_id: imageToDelete.file_id },
+        });
+        toast.success(res.data.message || 'Image deleted successfully');
       }
 
       updatedImages.splice(index, 1);
 
-      const hasNullPlaceholder = updatedImages.some((img) => img === null);
-      if (!hasNullPlaceholder) {
+      // Ensure there's always at least one null placeholder
+      if (
+        updatedImages.length === 0 ||
+        !updatedImages.some((img) => img === null)
+      ) {
         updatedImages.push(null);
       }
 
@@ -133,8 +153,9 @@ const CreateProduct = () => {
         'images',
         updatedImages.filter((img) => img !== null)
       );
-    } catch (error: any) {
-      console.log(error.message);
+    } catch (error) {
+      console.log((error as Error).message);
+      toast.error('Failed to delete image');
     }
   };
 
@@ -208,8 +229,8 @@ const CreateProduct = () => {
                 defaultImage="https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg"
                 index={0}
                 setOpenImageModel={setOpenImageModel}
-                currentImage={images[0]}
-                imageLoading={filId === '' ? false : imageLoading[filId]}
+                currentImage={images[0]?.file_url || null} // ✅ Pass the URL string or null
+                imageLoading={imageLoading[0] || false}
               />
 
               <select
@@ -232,18 +253,18 @@ const CreateProduct = () => {
 
           {images.length > 1 && (
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-              {images.slice(1).map((image, index) => (
+              {images.slice(1).map((image, idx) => (
                 <ImagePlaceHolders
                   small
-                  key={`thumb-${index + 1}`}
+                  key={`thumb-${idx + 1}`}
                   size={'100 x 100'}
                   onFileChange={onFileChange}
                   onFileRemove={onFileRemove}
                   defaultImage="https://static.vecteezy.com/system/resources/thumbnails/024/183/502/small_2x/male-avatar-portrait-of-a-young-man-with-a-beard-illustration-of-male-character-in-modern-color-style-vector.jpg"
-                  index={index + 1}
+                  index={idx + 1} // ✅ Pass the actual array index
                   setOpenImageModel={setOpenImageModel}
-                  currentImage={image}
-                  imageLoading={filId === '' ? false : imageLoading[filId]}
+                  currentImage={image?.file_url || null} // ✅ Pass the URL string or null
+                  imageLoading={imageLoading[idx + 1] || false}
                 />
               ))}
             </div>

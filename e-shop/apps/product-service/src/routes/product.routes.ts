@@ -6,6 +6,7 @@ import {
   getProductCategories,
   editDiscountCodes,
   uploadProductImage,
+  deleteProductImage,
 } from '../controller/product.controller';
 import {
   authorizeRoles,
@@ -52,6 +53,13 @@ productRouter.post(
   isAuthenticated,
   authorizeRoles('seller'),
   uploadProductImage
+);
+
+productRouter.post(
+  '/delete-image-file',
+  isAuthenticated,
+  authorizeRoles('seller'),
+  deleteProductImage
 );
 
 export default productRouter;
