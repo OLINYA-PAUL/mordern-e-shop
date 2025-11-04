@@ -256,7 +256,6 @@ export const uploadProductImage = async (
 ): Promise<void> => {
   try {
     const { files } = req.body;
-    console.log('this is files data', { files });
     if (!files) {
       res.status(400).json({ message: 'Please upload a file' });
       return;
@@ -271,6 +270,30 @@ export const uploadProductImage = async (
       file_url: upload.url,
       file_id: upload.fileId,
       message: 'Uploaded successfully',
+      status: true,
+    });
+  } catch (error) {
+    console.error('Error uploading product image:', (error as Error).message);
+    next(error);
+  }
+};
+
+export const deleteProductImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { file_id } = req.body;
+    if (!file_id) {
+      res.status(400).json({ message: 'Please upload a file' });
+      return;
+    }
+
+    console.log('Deleting file with ID:', file_id);
+    await imageKit.deleteFile(file_id);
+    res.status(200).json({
+      message: 'File deleted successfully',
       status: true,
     });
   } catch (error) {
